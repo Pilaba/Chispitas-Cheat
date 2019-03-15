@@ -1,15 +1,20 @@
 # Chispitas-Cheat
-App movil, and web panel to visualize the best option
+## TODO ##
 
-## Usage ##
+- Mejorar busqueda google
+- Opcion para typear o mencionar la pregunta
+- Mejorar la vista de opciones googleadas
 
-* npm i 
-* node server.js
-* visit http://localhost:3000
+## USO ##
 
-* INSTALL MOVIL PROVIDED IN APP MOVIL FOLDER
-* INSTALL MOVIL APP CALLED "Captura de pantalla"
+- npm install 
+- node app3
+- visitar http://127.0.0.1
+
+- Instalar App de la carpeta "App Movil"
+- Instalar App ["Captura de pantalla"](https://play.google.com/store/apps/details?id=com.icecoldapps.screenshoteasy)
 
 
 # PROFIT
 * Re piola pebete
+

@@ -10,7 +10,7 @@
 </p>
 
 ## DESCRIPCIÓN
-Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero obtenido es para adquirir mejorar la situación de pobreza extrema de Lenny.
+Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero obtenido es para mejorar la situación de pobreza extrema en la que vive Lenny.
 
 ## RENUNCIA LEGAL
  La presente Aplicación **sólo es para uso académico**, no se recomienda usar viles trucos, ya que eso no es ético. Haz caso al gran Campeón de las Artes Marciales, el gran Mr. Satán.

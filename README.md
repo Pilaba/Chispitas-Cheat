@@ -1,7 +1,7 @@
-# Confetti-Cheat
+# Chispitas-Cheat
 App movil, and web panel to visualize the best option
 
-## usage ##
+## Usage ##
 
 * npm i 
 * node server.js
@@ -12,3 +12,4 @@ App movil, and web panel to visualize the best option
 
 
 # PROFIT
+* Re piola pebete

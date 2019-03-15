@@ -1,0 +1,41 @@
+{
+  "name": "confetti_cheat",
+  "version": "1.0.0",
+  "description": "Confetti cheat app",
+  "main": "index.js",
+  "dependencies": {
+    "@google-cloud/vision": "^0.24.0",
+    "body-parser": "^1.18.3",
+    "cheerio": "^1.0.0-rc.2",
+    "connect-busboy": "^0.0.2",
+    "express": "^4.16.4",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "serve-favicon": "^2.5.0",
+    "sharp": "^0.21.3",
+    "socketio": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "PILABA",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pilaba/Confetti-Cheat.git"
+  },
+  "keywords": [
+    "Confetti",
+    "fb",
+    "node",
+    "ML",
+    "wolfram",
+    "android"
+  ],
+  "bugs": {
+    "url": "https://github.com/Pilaba/Confetti-Cheat/issues"
+  },
+  "homepage": "https://github.com/Pilaba/Confetti-Cheat#readme"
+}

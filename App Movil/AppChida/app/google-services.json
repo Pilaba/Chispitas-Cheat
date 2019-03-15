@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "847487022243",
+    "firebase_url": "https://confetticheat.firebaseio.com",
+    "project_id": "confetticheat",
+    "storage_bucket": "confetticheat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:847487022243:android:e7b63c11aa6cb571",
+        "android_client_info": {
+          "package_name": "app.appchida.com.appchida"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "847487022243-ioseq8i73a79om2kdgakv17ace20adtl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFTstZhgm87_6hREN0Vr17N8cvgHkrjvo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

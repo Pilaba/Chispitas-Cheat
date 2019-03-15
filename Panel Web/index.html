@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" /> <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>ON TOY</title> <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- Google charts, boostrap 3, JQuery, SocketIO -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script type="text/javascript">
+        google.charts.load("current", {packages:["corechart"]});
+        google.charts.setOnLoadCallback(chartLoaded);
+        function chartLoaded(){
+            drawGrafica([['Messi', 70], ['Hulk', 25], ['Fernando alonso', 5]], undefined, "x")
+        }
+
+        function drawGrafica(respuestas, chartID, title){
+            var data = google.visualization.arrayToDataTable([
+                ['Respuestas', 'Cantidad'],
+                respuestas[0],
+                respuestas[1],
+                respuestas[2]
+            ]);
+
+            var options = {
+                title: title,
+                is3D:true, 
+                colors:['#5cb85c', '#f0ad4e', '#d9534f'],
+                pieSliceText: 'label',
+                chartArea:{left:10, top:20, width:"100%", height:"100%"},
+                legend: {position :"left", alignment : "center", textStyle: {fontSize: 16, bold : true}}
+            };
+            if(chartID == undefined){
+                var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+                var chart2 = new google.visualization.PieChart(document.getElementById('piechart_3d2'));
+                chart.draw(data, options);
+                chart2.draw(data, options);
+            }else{
+                var chart = new google.visualization.PieChart(document.getElementById(chartID));
+                chart.draw(data, options);
+            }
+        }
+    </script>
+
+</head>
+<body>  
+    <span class="col-md-11 glyphicon glyphicon-time text-success" id="time"
+        style="font-size: larger; padding-top: 2px; padding-left: 10px;"> 1.52 s
+    </span>
+
+    <!-- Example row of columns -->
+    <div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h2 id="pregunta" class="btn btn-default" style="width: 100%; font-size: large; white-space:normal !important; word-wrap: break-word;">
+                ¿Cual de estos manes NO es futbolista?
+            </h2>
+            <div id="piechart_3d" class="col-md-12" style="height: 240px;"></div>
+            <div id="piechart_3d2" class="col-md-12" style="height: 240px;"></div>
+                 
+            <div class="col-md-12">
+                <div id="lista" class="list-group">
+                    <a href="#" target="_blank" class="list-group-item" id="1">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success progress-bar-striped" style="width: 70%"></div>
+                            <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 25%"></div>
+                            <div class="progress-bar progress-bar-danger progress-bar-striped" style="width: 5%"></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h2 class="btn btn-default " style="width: 100%; font-size: large">Busquedas en google</h2>
+            <script>
+                (function() {
+                  var cx = '001129582380055340761:tkxrmpvv4re';
+                  var gcse = document.createElement('script');
+                  gcse.type = 'text/javascript';
+                  gcse.async = true;
+                  gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+                  var s = document.getElementsByTagName('script')[0];
+                  s.parentNode.insertBefore(gcse, s);
+                })();
+            </script>
+            <gcse:searchresults-only gname="search" webSearchResultSetSize="4"></gcse:searchresults-only>
+        </div>
+
+    </div>
+    </div>
+</body>
+<footer>
+    <script>
+        //SocketIO initializacion
+        var socket = io.connect();
+
+        //TIME 
+        socket.on("T", function(timeMillis) {
+            document.getElementById("time").innerHTML = "  "+timeMillis + " s"
+        });
+
+        //Google search
+        socket.on('Q', function (data) {
+            var pregunta = document.getElementById('pregunta');
+            pregunta.innerText = data.pregunta;
+
+            //Rellenar Busqueda Items
+            document.getElementById("lista").innerHTML = ""
+            var itemsBusqueda = data.items
+            if(itemsBusqueda == undefined){ 
+                document.getElementById("lista").innerHTML = "NO USEFUL LINKS FOUND"
+                return
+            }
+
+            for (var i = 0; i < itemsBusqueda.length; i++) {
+                var item = itemsBusqueda[i];
+                document.getElementById("lista").innerHTML += 
+                        '<a href="'+item.link+'" target="_blank" class="list-group-item>' +
+                        '<h4 class="list-group-item-heading">'+item.htmlTitle+'</h4>'+
+                        '<div class="progress" id="Item'+i+'"></div></a>'
+            }
+
+            google.search.cse.element.getElement("search").execute(data.pregunta)
+        });
+
+        //GRAFICA
+        socket.on('Grafica', function (data) {
+            var array = data.dataExta.extra;
+            var suma = array.reduce((a,b) => a+b)
+
+            if(suma != 0){
+                document.getElementById("Item"+data.dataExta.indice).innerHTML = 
+                '<div class="progress-bar progress-bar-success progress-bar-striped" style="width:'+ array[0] * 100 / suma +'%"></div>' +
+                '<div class="progress-bar progress-bar-warning progress-bar-striped" style="width:'+ array[1] * 100 / suma +'%"></div>' +
+                '<div class="progress-bar progress-bar-danger  progress-bar-striped" style="width:'+ array[2] * 100 / suma +'%"></div>'
+            }
+            drawGrafica(data.matriz, 'piechart_3d', 'Google')
+        });
+
+        //GRAFICA
+        socket.on('GraficaB', function (data) {
+            var array = data.dataExta.extra;
+            var suma = array.reduce((a,b) => a+b)
+
+            drawGrafica(data.matriz, 'piechart_3d2', 'Bing')
+        });
+    </script>
+
+    <!-- ON TOY -->
+</footer>
+</html>

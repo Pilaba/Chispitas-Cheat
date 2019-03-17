@@ -76,7 +76,68 @@
         </div>
 
         <div class="col-md-6">
-            <h2 class="btn btn-default " style="width: 100%; font-size: large">Busquedas en google</h2>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th id="resp0">Messi</th>
+                        <th id="resp1">Hulk</th>
+                        <th id="resp2">Fernando Alonso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <table id="Table0" class="table table-bordered"> 
+                                <tbody>
+                                    <tr>
+                                        <td>Messi</td>
+                                        <td>20</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td>
+                            <table id="Table1" class="table table-bordered"> 
+                                <tbody>
+                                    <tr>
+                                        <td>Hulk</td>
+                                        <td>8</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                        <td>
+                            <table id="Table2" class="table table-bordered"> 
+                                <tbody>
+                                    <tr>
+                                        <td>fernando</td>
+                                        <td>2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Alonso</td>
+                                        <td>1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+        
+            </table>
+            <div id="x">
+
+            </div>
+    
+            <div class="col-md-9" style="padding: 20px">
+                <input id="question" type="text" class="col-md-12 form-control">
+            </div>
+            <div class="col-md-3" style="padding: 20px">
+                <button id="submit" type="button" class="col-md-12 form-control btn-success">
+                    GO
+                </button>
+            </div>
+
             <script>
                 (function() {
                   var cx = '001129582380055340761:tkxrmpvv4re';
@@ -88,7 +149,7 @@
                   s.parentNode.insertBefore(gcse, s);
                 })();
             </script>
-            <gcse:searchresults-only gname="search" webSearchResultSetSize="4"></gcse:searchresults-only>
+            <gcse:searchresults-only gname="search" webSearchResultSetSize="3"></gcse:searchresults-only>
         </div>
 
     </div>
@@ -128,8 +189,8 @@
             google.search.cse.element.getElement("search").execute(data.pregunta)
         });
 
-        //GRAFICA
-        socket.on('Grafica', function (data) {
+        //GRAFICA Google
+        socket.on('GraficaGoogle', function (data) {
             var array = data.dataExta.extra;
             var suma = array.reduce((a,b) => a+b)
 
@@ -142,13 +203,48 @@
             drawGrafica(data.matriz, 'piechart_3d', 'Google')
         });
 
-        //GRAFICA
-        socket.on('GraficaB', function (data) {
+        //GRAFICA Bing
+        socket.on('GraficaBing', function (data) {
             var array = data.dataExta.extra;
             var suma = array.reduce((a,b) => a+b)
 
             drawGrafica(data.matriz, 'piechart_3d2', 'Bing')
         });
+
+        //Enter trigger REquestion
+        $('#question').keypress(e => {
+            if(e.keyCode==13) { $('#submit').click() }
+        });
+
+        //REquestion
+        $("#submit").on("click", (data) => {
+            if($("#question").val() != ""){
+                socket.emit("REquestion", {q: $("#question").val(), id: socket.id })
+            }
+        })
+
+        //Busqueda por cada palabra
+        socket.on('EachWordSeach', function(obj) {
+            $("#Table0 > tbody").html("")
+            $("#Table1 > tbody").html("")
+            $("#Table2 > tbody").html("")
+
+            $("#resp0").text(obj.data[0][0].resp)
+            $("#resp1").text(obj.data[1][0].resp)
+            $("#resp2").text(obj.data[2][0].resp)
+
+            obj.data.forEach((array, index) => {
+                array.forEach(itemObj => {
+                    $("#Table"+index+" > tbody").append(`
+                        <tr>
+                            <td>${itemObj.word}</td>
+                            <td>${itemObj.count}</td>
+                        </tr>
+                    `)
+                })
+            });
+        })
+
     </script>
 
     <!-- ON TOY -->

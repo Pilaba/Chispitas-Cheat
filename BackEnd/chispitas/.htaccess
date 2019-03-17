@@ -1,0 +1,21 @@
+RewriteEngine On
+RewriteBase /chispitas/
+
+Options -Indexes
+RewriteRule ^$ /chispitas/index.php [L]
+RewriteCond $1 !^(index\.php|assets|system|user_guide|robots\.txt|favicon\.ico)
+RewriteRule ^(.*)$ /chispitas/index.php?/$1 [L]
+
+RewriteCond %{REQUEST_URI} ^system.*
+RewriteRule ^(.*)$ /index.php?/$1 [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+ErrorDocument 404 /index.php
+
+# BEGIN Compress text files
+<ifModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml application/xml application/xhtml+xml text/css text/javascript application/javascript application/x-javascript
+</ifModule>
+# END Compress text files

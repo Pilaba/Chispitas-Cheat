@@ -19,7 +19,7 @@ Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero
  - [ ]  Mejorar busquedas en Google
  - [ ] Opción para typear o mencionar la pregunta (speech)
  - [ ] Mejorar la vista de opciones googleadas y el desplegado de resultados
- - [ ] Agregar API Search de Wikipedia
+ - [x] ~~Agregar API Search de Wikipedia~~ Ni de coña, google es mente superior. El API search de Mediawiki es una poronga.
  - [ ] Crear Backend en CodeIgniter para almacenar datos y mostrar estadísticas
  - [ ] Evaluar implementar Machine Learning
 

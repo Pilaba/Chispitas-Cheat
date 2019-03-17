@@ -32,7 +32,9 @@ Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero
 ## USO DE LA APLICACIÓN
 
  - npm install 
- - node app3
+ - npm start -> para iniciar
+ - npm stop -> para detener
+ - npm restart -> para reiniciar
  - visitar http://127.0.0.1
  - Instalar App de la carpeta "App Movil"
  - Instalar App ["Captura de pantalla"](https://play.google.com/store/apps/details?id=com.icecoldapps.screenshoteasy)

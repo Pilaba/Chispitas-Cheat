@@ -1,7 +1,7 @@
 {
-  "name": "confetti_cheat",
+  "name": "chispitas_cheat",
   "version": "1.0.0",
-  "description": "Confetti cheat app",
+  "description": "Chispitas cheat app",
   "main": "index.js",
   "dependencies": {
     "@google-cloud/vision": "^0.24.0",
@@ -29,10 +29,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Pilaba/Confetti-Cheat.git"
+    "url": "git+https://github.com/Pilaba/Chispitas-Cheat.git"
   },
   "keywords": [
-    "Confetti",
+    "Chispitas",
     "fb",
     "node",
     "ML",
@@ -40,7 +40,7 @@
     "android"
   ],
   "bugs": {
-    "url": "https://github.com/Pilaba/Confetti-Cheat/issues"
+    "url": "https://github.com/Pilaba/Chispitas-Cheat/issues"
   },
-  "homepage": "https://github.com/Pilaba/Confetti-Cheat#readme"
+  "homepage": "https://github.com/Pilaba/Chispitas-Cheat/#readme"
 }

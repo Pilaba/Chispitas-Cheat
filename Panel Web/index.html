@@ -1,15 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="utf-8" /> <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>ON TOY</title> <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+    <title>ON TOY</title>
+    <meta charset="utf-8" /> 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" lang="es">
+    <meta name="description" content="App para hacer un dinero bien chingon en confetti y Q12 " />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="keywords" content="chispitas,confetti,da dinero, ratero"/>
+    <meta name="author" content="Pilaba"/>
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="google-site-verification" content="">
+    <meta property="og:title" content="Chispitas-Cheat">
+    <meta property="og:image" content="ttps://i.ibb.co/F35fzyZ/logo-largo.png">
+    <meta property="og:site_name" content="Chispitas">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="" />
+    <base href="" />
+
+
+
     <!-- Google charts, boostrap 3, JQuery, SocketIO -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
     <script type="text/javascript">
         google.charts.load("current", {packages:["corechart"]});
@@ -48,114 +73,159 @@
 
 </head>
 <body>  
-    <span class="col-md-11 glyphicon glyphicon-time text-success" id="time"
-        style="font-size: larger; padding-top: 2px; padding-left: 10px;"> 1.52 s
-    </span>
-
-    <!-- Example row of columns -->
+    <br>
     <div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <h2 id="pregunta" class="btn btn-default" style="width: 100%; font-size: large; white-space:normal !important; word-wrap: break-word;">
-                ¿Cual de estos manes NO es futbolista?
-            </h2>
-            <div id="piechart_3d" class="col-md-12" style="height: 240px;"></div>
-            <div id="piechart_3d2" class="col-md-12" style="height: 240px;"></div>
-                 
-            <div class="col-md-12">
-                <div id="lista" class="list-group">
-                    <a href="#" target="_blank" class="list-group-item" id="1">
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-success progress-bar-striped" style="width: 70%"></div>
-                            <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 25%"></div>
-                            <div class="progress-bar progress-bar-danger progress-bar-striped" style="width: 5%"></div>
-                        </div>
-                    </a>
+      <!-- Static navbar -->
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href=""><img src="https://i.ibb.co/8MHFC4t/chispitas-logo.png" width="150" class="img-responsive"></a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href=""><i class="fa fa-smile-o" aria-hidden="true"></i>&nbsp;Herramienta</a></li>
+              <li><a href="https://github.com/Pilaba/Chispitas-Cheat" target="_blank"><i class="fa fa-github" aria-hidden="true"></i>&nbsp;Repo</a></li>
+              <li><a href="#"><i class="fa fa-cogs" aria-hidden="true"></i>&nbsp;Ajustes</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-coffee" aria-hidden="true"></i>&nbsp;Backend <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#"><i class="fa fa-cutlery" aria-hidden="true"></i>&nbsp;Corridas</a></li>
+                  <li><a href="#"><i class="fa fa-pie-chart" aria-hidden="true"></i>&nbsp;Estadísticas</a></li>
+                   <li role="separator" class="divider"></li>
+                  <li><a href="#"><i class="fa fa-question-circle" aria-hidden="true"></i>&nbsp;Documentación</a></li>
+                </ul>
+              </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                             
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </nav>
+      <div class="row">
+        <div class="col-md-12 text-right">
+            <span class="fa fa-clock-o text-success" id="time"
+                style="font-size: larger; padding-top: 2px; padding-left: 10px;"> 1.52 s
+            </span>
+        </div>
+      </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h2 id="pregunta" class="btn btn-default btn-flat" style="width: 100%; font-size: large; white-space:normal !important; word-wrap: break-word;">
+                    ¿Cual de estos manes NO es futbolista?
+                </h2>
+                <div id="piechart_3d" class="col-md-12" style="height: 240px;"></div>
+                <div id="piechart_3d2" class="col-md-12" style="height: 240px;"></div>
+                     
+                <div class="col-md-12">
+                    <div id="lista" class="list-group">
+                        <a href="#" target="_blank" class="list-group-item" id="1">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-success progress-bar-striped" style="width: 70%"></div>
+                                <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 25%"></div>
+                                <div class="progress-bar progress-bar-danger progress-bar-striped" style="width: 5%"></div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-6">
+            <div class="col-md-6">
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th id="resp0">Messi</th>
+                            <th id="resp1">Hulk</th>
+                            <th id="resp2">Fernando Alonso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <table id="Table0" class="table table-bordered"> 
+                                    <tbody>
+                                        <tr>
+                                            <td>Messi</td>
+                                            <td>20</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <table id="Table1" class="table table-bordered"> 
+                                    <tbody>
+                                        <tr>
+                                            <td>Hulk</td>
+                                            <td>8</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <table id="Table2" class="table table-bordered"> 
+                                    <tbody>
+                                        <tr>
+                                            <td>fernando</td>
+                                            <td>2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Alonso</td>
+                                            <td>1</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
             
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th id="resp0">Messi</th>
-                        <th id="resp1">Hulk</th>
-                        <th id="resp2">Fernando Alonso</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <table id="Table0" class="table table-bordered"> 
-                                <tbody>
-                                    <tr>
-                                        <td>Messi</td>
-                                        <td>20</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td>
-                            <table id="Table1" class="table table-bordered"> 
-                                <tbody>
-                                    <tr>
-                                        <td>Hulk</td>
-                                        <td>8</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                        <td>
-                            <table id="Table2" class="table table-bordered"> 
-                                <tbody>
-                                    <tr>
-                                        <td>fernando</td>
-                                        <td>2</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Alonso</td>
-                                        <td>1</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                </tbody>
+                </table>
+                <div id="x">
+
+                </div>
         
-            </table>
-            <div id="x">
+                <div class="col-md-9" style="padding: 20px">
+                    <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
+                    <input id="question" type="text" class="col-md-12 form-control">
+                </div>
+                <div class="col-md-3" style="padding: 20px">
+                    <br>
+                    <button id="submit" type="button" class="col-md-12 form-control btn-success">
+                        <i class="fa fa-search" aria-hidden="true"></i> GO!
+                    </button>
+                </div>
 
+                <script>
+                    (function() {
+                      var cx = '001129582380055340761:tkxrmpvv4re';
+                      var gcse = document.createElement('script');
+                      gcse.type = 'text/javascript';
+                      gcse.async = true;
+                      gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+                      var s = document.getElementsByTagName('script')[0];
+                      s.parentNode.insertBefore(gcse, s);
+                    })();
+                </script>
+                <gcse:searchresults-only gname="search" webSearchResultSetSize="3"></gcse:searchresults-only>
             </div>
-    
-            <div class="col-md-9" style="padding: 20px">
-                <input id="question" type="text" class="col-md-12 form-control">
-            </div>
-            <div class="col-md-3" style="padding: 20px">
-                <button id="submit" type="button" class="col-md-12 form-control btn-success">
-                    GO
-                </button>
-            </div>
-
-            <script>
-                (function() {
-                  var cx = '001129582380055340761:tkxrmpvv4re';
-                  var gcse = document.createElement('script');
-                  gcse.type = 'text/javascript';
-                  gcse.async = true;
-                  gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
-                  var s = document.getElementsByTagName('script')[0];
-                  s.parentNode.insertBefore(gcse, s);
-                })();
-            </script>
-            <gcse:searchresults-only gname="search" webSearchResultSetSize="3"></gcse:searchresults-only>
         </div>
 
-    </div>
-    </div>
+    </div> <!-- /container -->
+
 </body>
-<footer>
+<footer class="footer">
+    <div class="container">
+        <hr>
+        <p>Company, Inc. &copy; 2019 &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a> <span class="pull-right"><i class="fa fa-terminal" aria-hidden="true"></i>&nbsp;<a href="https://bleutecmedia.com/member/i-f-baldemar-alejandres-garcia/" target="_blank">Author</a> | <a href="https://bleutecmedia.com/member/rigoberto-alejandres-garcia/" target="_blank">Colaborador</a></span></p>
+    </div>
+
     <script>
         //SocketIO initializacion
         var socket = io.connect();

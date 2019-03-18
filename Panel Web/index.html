@@ -12,12 +12,11 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="google-site-verification" content="">
     <meta property="og:title" content="Chispitas-Cheat">
-    <meta property="og:image" content="ttps://i.ibb.co/F35fzyZ/logo-largo.png">
+    <meta property="og:image" content="https://i.ibb.co/F35fzyZ/logo-largo.png">
     <meta property="og:site_name" content="Chispitas">
     <meta property="og:type" content="website" />
     <meta property="og:url" content="" />
     <base href="" />
-
 
 
     <!-- Google charts, boostrap 3, JQuery, SocketIO -->
@@ -29,6 +28,7 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -62,11 +62,11 @@
 
             if(chartID == undefined){
                 options['title']    =   "GOOGLE afirma que: ";
-                var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+                var chart = new google.visualization.PieChart(document.getElementById('googleGrafica'));
                 chart.draw(data, options);
 
                 options['title']    =   "BING dice que: ";
-                var chart2 = new google.visualization.PieChart(document.getElementById('piechart_3d2'));
+                var chart2 = new google.visualization.PieChart(document.getElementById('bingGrafica'));
                 chart2.draw(data, options);
             }else{
                 var chart = new google.visualization.PieChart(document.getElementById(chartID));
@@ -78,7 +78,7 @@
 </head>
 <body>  
     <br>
-    <div class="container">
+    <div class="container" id="app">
       <!-- Static navbar -->
       <nav class="navbar navbar-default">
         <div class="container-fluid">
@@ -114,27 +114,28 @@
       </nav>
       <div class="row">
         <div class="col-md-12 text-right">
-            <span class="fa fa-clock-o text-success" id="time"
-                style="font-size: larger; padding-top: 2px; padding-left: 10px;"> 1.52 s
+            <span class="fa fa-clock-o text-success"
+                style="font-size: larger; padding-top: 2px; padding-left: 10px;"> {{ TIME }} s
             </span>
         </div>
       </div>
 
-        <div class="row">
+        <div class="row" >
             <div class="col-md-6">
-                <h2 id="pregunta" class="btn btn-default btn-flat" style="width: 100%; font-size: large; white-space:normal !important; word-wrap: break-word;">
-                    ¿Cual de estos manes NO es futbolista?
+                <h2 class="btn btn-default btn-flat" style="width: 100%; font-size: large; white-space:normal !important; word-wrap: break-word;">
+                    {{ pregunta }}
                 </h2>
-                <div id="piechart_3d" class="col-md-12" style="height: 240px;"></div>
-                <div id="piechart_3d2" class="col-md-12" style="height: 240px;"></div>
-                     
+                <div id="googleGrafica" class="col-md-12" style="height: 240px;"></div>
+                <div id="bingGrafica" class="col-md-12" style="height: 240px;"></div>
+               
                 <div class="col-md-12">
                     <div id="lista" class="list-group">
-                        <a href="#" target="_blank" class="list-group-item" id="1">
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-success progress-bar-striped" style="width: 70%"></div>
-                                <div class="progress-bar progress-bar-warning progress-bar-striped" style="width: 25%"></div>
-                                <div class="progress-bar progress-bar-danger progress-bar-striped" style="width: 5%"></div>
+                        <a v-for="(item, index) in itemsBusqueda" v-bind:href="item.link" target="_blank" class="list-group-item-heading">
+                            {{ item.htmlTitle }}
+                            <div class="progress" v-if="item.p">
+                                <div v-bind:style="{width: item.p.A+ '%'}" class="progress-bar progress-bar-success progress-bar-striped"></div>
+                                <div v-bind:style="{width: item.p.B+ '%'}" class="progress-bar progress-bar-warning progress-bar-striped"></div>
+                                <div v-bind:style="{width: item.p.C+ '%'}" class="progress-bar progress-bar-danger  progress-bar-striped"></div>
                             </div>
                         </a>
                     </div>
@@ -142,66 +143,36 @@
             </div>
 
             <div class="col-md-6">
-                
                 <table class="table">
                     <thead>
                         <tr>
-                            <th id="resp0">Messi</th>
-                            <th id="resp1">Hulk</th>
-                            <th id="resp2">Fernando Alonso</th>
+                            <th>{{ respuestas[0] }}</th>
+                            <th>{{ respuestas[1] }}</th>
+                            <th>{{ respuestas[2] }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>
-                                <table id="Table0" class="table table-bordered"> 
-                                    <tbody>
+                            <td v-for="array in eachWord">
+                                <table class="table table-bordered">
+                                    <tbody v-for="item in array">
                                         <tr>
-                                            <td>Messi</td>
-                                            <td>20</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                            <td>
-                                <table id="Table1" class="table table-bordered"> 
-                                    <tbody>
-                                        <tr>
-                                            <td>Hulk</td>
-                                            <td>8</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                            <td>
-                                <table id="Table2" class="table table-bordered"> 
-                                    <tbody>
-                                        <tr>
-                                            <td>fernando</td>
-                                            <td>2</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Alonso</td>
-                                            <td>1</td>
+                                            <td>{{ item.word }}</td>
+                                            <td>{{ item.count }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </td>
                         </tr>
                     </tbody>
-            
                 </table>
-                <div id="x">
-
-                </div>
         
                 <div class="col-md-9" style="padding: 20px">
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
-                    <input id="question" type="text" class="col-md-12 form-control">
+                    <input v-model="REquestion" v-on:keyup.enter="submit" type="text" class="col-md-12 form-control">
                 </div>
-                <div class="col-md-3" style="padding: 20px">
-                    <br>
-                    <button id="submit" type="button" class="col-md-12 form-control btn-success">
+                <div class="col-md-3" style="padding: 20px"> <br>
+                    <button v-on:click="submit" type="button" class="col-md-12 form-control btn-success">
                         <i class="fa fa-search" aria-hidden="true"></i> GO!
                     </button>
                 </div>
@@ -231,93 +202,63 @@
     </div>
 
     <script>
-        //SocketIO initializacion
-        var socket = io.connect();
+        //Vuejs initializacion
+        var app = new Vue({ 
+            el: '#app',
+            data: {
+                TIME: 1.52, socket :{}, pregunta: "¿Cual de estos manes NO es futbolista?", 
+                respuestas: ['Messi', 'Hulk', 'Fernando Alonso'],  REquestion: '',
+                itemsBusqueda: [
+                    {link: "https://taringa.net", htmlTitle: "Messi el hormonado", p: {A:90, B:5, C:5}}
+                ], 
+                eachWord: [ [{word: "Messi", count : "20"}], [{word: "Hulk", count : "8"}], 
+                            [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ]
+            },
+            created: function () {
+                this.socket = io.connect();
+                this.socket.on('T', this.onTime)
+                this.socket.on('Q', this.onQuestion)
+                this.socket.on('GraficaGoogle', this.onGoogle)
+                this.socket.on('GraficaBing', this.onBing)
+                this.socket.on('EachWordSeach', this.onEachWordSeach)
+            },
+            methods: {
+                onTime: function(timeMillis){
+                    this.TIME = timeMillis
+                },
+                onQuestion: function(data){
+                    google.search.cse.element.getElement("search").execute(data.pregunta)
 
-        //TIME 
-        socket.on("T", function(timeMillis) {
-            document.getElementById("time").innerHTML = "  "+timeMillis + " s"
-        });
+                    this.pregunta = data.pregunta
+                    this.respuestas = data.respuestas
+                    this.itemsBusqueda = data.items
+                },
+                onGoogle: function(data){
+                    var array = data.dataExta.extra
+                    var suma = array.reduce((a,b) => a+b)
+                    var indice = data.dataExta.indice
+                    
+                    if(this.itemsBusqueda[indice] != undefined){
+                        this.itemsBusqueda[indice].p = {
+                            A : array[0] * 100 / suma,
+                            B : array[1] * 100 / suma,
+                            C : array[2] * 100 / suma
+                        }
+                    }
 
-        //Google search
-        socket.on('Q', function (data) {
-            var pregunta = document.getElementById('pregunta');
-            pregunta.innerText = data.pregunta;
-
-            //Rellenar Busqueda Items
-            document.getElementById("lista").innerHTML = ""
-            var itemsBusqueda = data.items
-            if(itemsBusqueda == undefined){ 
-                document.getElementById("lista").innerHTML = "NO USEFUL LINKS FOUND"
-                return
+                    drawGrafica(data.matriz, 'googleGrafica', 'GOOGLE afirma que: ')
+                },
+                onBing: function(data){
+                    drawGrafica(data.matriz, 'bingGrafica', 'BING dice que: ')
+                },
+                onEachWordSeach: function(data){
+                    this.eachWord = data.matriz
+                },
+                submit: function(event){
+                    this.socket.emit("REquestion", {q: this.REquestion, id: this.socket.id })
+                },
             }
-
-            for (var i = 0; i < itemsBusqueda.length; i++) {
-                var item = itemsBusqueda[i];
-                document.getElementById("lista").innerHTML += 
-                        '<a href="'+item.link+'" target="_blank" class="list-group-item>' +
-                        '<h4 class="list-group-item-heading">'+item.htmlTitle+'</h4>'+
-                        '<div class="progress" id="Item'+i+'"></div></a>'
-            }
-
-            google.search.cse.element.getElement("search").execute(data.pregunta)
         });
-
-        //GRAFICA Google
-        socket.on('GraficaGoogle', function (data) {
-            var array = data.dataExta.extra;
-            var suma = array.reduce((a,b) => a+b)
-
-            if(suma != 0){
-                document.getElementById("Item"+data.dataExta.indice).innerHTML = 
-                '<div class="progress-bar progress-bar-success progress-bar-striped" style="width:'+ array[0] * 100 / suma +'%"></div>' +
-                '<div class="progress-bar progress-bar-warning progress-bar-striped" style="width:'+ array[1] * 100 / suma +'%"></div>' +
-                '<div class="progress-bar progress-bar-danger  progress-bar-striped" style="width:'+ array[2] * 100 / suma +'%"></div>'
-            }
-            drawGrafica(data.matriz, 'piechart_3d', 'Google')
-        });
-
-        //GRAFICA Bing
-        socket.on('GraficaBing', function (data) {
-            var array = data.dataExta.extra;
-            var suma = array.reduce((a,b) => a+b)
-
-            drawGrafica(data.matriz, 'piechart_3d2', 'Bing')
-        });
-
-        //Enter trigger REquestion
-        $('#question').keypress(e => {
-            if(e.keyCode==13) { $('#submit').click() }
-        });
-
-        //REquestion
-        $("#submit").on("click", (data) => {
-            if($("#question").val() != ""){
-                socket.emit("REquestion", {q: $("#question").val(), id: socket.id })
-            }
-        })
-
-        //Busqueda por cada palabra
-        socket.on('EachWordSeach', function(obj) {
-            $("#Table0 > tbody").html("")
-            $("#Table1 > tbody").html("")
-            $("#Table2 > tbody").html("")
-
-            $("#resp0").text(obj.data[0][0].resp)
-            $("#resp1").text(obj.data[1][0].resp)
-            $("#resp2").text(obj.data[2][0].resp)
-
-            obj.data.forEach((array, index) => {
-                array.forEach(itemObj => {
-                    $("#Table"+index+" > tbody").append(`
-                        <tr>
-                            <td>${itemObj.word}</td>
-                            <td>${itemObj.count}</td>
-                        </tr>
-                    `)
-                })
-            });
-        })
 
     </script>
 

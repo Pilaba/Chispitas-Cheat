@@ -130,7 +130,7 @@ function googleSearch(pregunta, respuestasArray, socketID){
                             [respuestasArray[2], countC]
                         ]
                         emitSockets('GraficaGoogle', {
-                            matriz: matriz, 
+                            matriz: matriz,
                             dataExta: {indice:i, extra: [encontradosA, encontradosB, encontradosC] }
                         }, socketID)
                     }
@@ -149,14 +149,12 @@ function googleSearch(pregunta, respuestasArray, socketID){
                                 sum = BuscaPalabra[index][i].count
                             }
                             BuscaPalabra[index][i] = {
-                                resp: resp,
                                 word: word,
                                 count : sum + encontrados
                             }
                         });
                     });
-
-                    emitSockets("EachWordSeach", {data: BuscaPalabra}, socketID)
+                    emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)
 
                     //<!-- -->
                 }).catch(err => {
@@ -217,8 +215,7 @@ function bingSearch(pregunta, respuestasArray, socketID){
                         [respuestasArray[2], countC]
                     ]
                     emitSockets('GraficaBing', {
-                        matriz: matriz, 
-                        dataExta: {indice:i, extra: [encontradosA, encontradosB, encontradosC] } 
+                        matriz: matriz
                     }, socketID)
                 }
 

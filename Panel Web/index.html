@@ -59,10 +59,14 @@
                 chartArea:{left:10, top:20, width:"100%", height:"100%"},
                 legend: {position :"left", alignment : "center", textStyle: {fontSize: 16, bold : true}}
             };
+
             if(chartID == undefined){
+                options['title']    =   "GOOGLE afirma que: ";
                 var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
-                var chart2 = new google.visualization.PieChart(document.getElementById('piechart_3d2'));
                 chart.draw(data, options);
+
+                options['title']    =   "BING dice que: ";
+                var chart2 = new google.visualization.PieChart(document.getElementById('piechart_3d2'));
                 chart2.draw(data, options);
             }else{
                 var chart = new google.visualization.PieChart(document.getElementById(chartID));

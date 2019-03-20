@@ -21,9 +21,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "pm2 start app3.js",
-    "stop" : "pm2 stop all",
+    "stop": "pm2 stop all",
     "restart": "pm2 restart all"
-
   },
   "author": "PILABA",
   "license": "MIT",

@@ -1,3 +1,4 @@
+"use strict";
 //Web setup
 const app = require("express")();
 const http = require('http').createServer(app);
@@ -8,16 +9,22 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 //SocketIO setup
 let coneccionesSocket = []
 let respuestasArray = []
+let isGoogling = false
 io.on('connection', function (socket) {
     coneccionesSocket.push(socket);
     socket.on("disconnect", () => { //Disconected guy
         coneccionesSocket.splice(coneccionesSocket.indexOf(socket), 1) 
     })
     socket.on("REquestion", (data) => {
+        isGoogling = true;
         googleSearch(data.q, respuestasArray, data.id)
         bingSearch(data.q, respuestasArray, data.id)
     })
 });
+
+//Variable global para accesso desde la funcion googleSearch y bingSearch
+//Y llevar un control sobre las incidencias de cada palabra en ambos motores
+let BuscaPalabra;
 
 //3rd party Libraries setup
 const busboy = require('connect-busboy');
@@ -78,6 +85,9 @@ app.post("/", (req, res, next) => {
 });
 
 function googleSearch(pregunta, respuestasArray, socketID){
+    //Resetear cotador de incidencias para cada palabra
+    BuscaPalabra = [[{}], [{}], [{}]]
+
     GET({
         uri: "https://www.google.com.mx/search",
         headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
@@ -89,8 +99,7 @@ function googleSearch(pregunta, respuestasArray, socketID){
         let resultados = $("div.g")
         let items = []
 
-        let countA = countB = countC = 0;
-        let BuscaPalabra = [[{}], [{}], [{}]];
+        let countA = 0, countB = 0, countC = 0;
 
         for (let i = 0; i < resultados.length; i++) {
             let title = $(resultados[i]).find("h3").text();
@@ -135,8 +144,9 @@ function googleSearch(pregunta, respuestasArray, socketID){
                         }, socketID)
                     }
 
-                    //SEARCH FOR EVERY WORD BETA
-                    respuestasArray.forEach((resp, index, arr) => {
+                    //SEARCH FOR EVERY WORD 
+                    let arrayClon = [...respuestasArray]  //Clon para prevenir que se modifiquen los valores dentro del array
+                    arrayClon.forEach((resp, index, arr) => {
                         let split = removeWords(resp).split(" ").filter(el => el.length > 0)
                         
                         split.forEach((word, i) => {
@@ -150,13 +160,12 @@ function googleSearch(pregunta, respuestasArray, socketID){
                             }
                             BuscaPalabra[index][i] = {
                                 word: word,
-                                count : sum + encontrados
+                                count: sum + encontrados
                             }
                         });
                     });
                     emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)
 
-                    //<!-- -->
                 }).catch(err => {
                     console.log("error parsing google link ", link, " ", "at index", " ", i)
                 })
@@ -176,51 +185,71 @@ function bingSearch(pregunta, respuestasArray, socketID){
             count : 15
         }, transform: function (body) { return cheerio.load(body); } 
     }).then($ => {
-        let resultados = $("#b_results > li.b_algo")
+        let resultados2 = $("#b_results > li.b_algo")
 
-        var countA = countB = countC = 0;
-
-        for (let i = 0; i < resultados.length; i++) {
-            let title = $(resultados[i]).find("h2 > a").text();
-            let link = $(resultados[i]).find("h2 > a").attr("href");
-            let desc = $(resultados[i]).find("div > p").text();
-            let parseoIniciado = new Date();
+        let countA2 = 0, countB2 = 0, countC2 = 0;
+        for (let j = 0; j < resultados2.length; j++) {
+            let title2 = $(resultados2[j]).find("h2 > a").text();
+            let link2 = $(resultados2[j]).find("h2 > a").attr("href");
+            let parseoIniciado2 = new Date();
 
             GET({
-                uri: link,
+                uri: link2,
                 headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
                 transform: function (body) { return cheerio.load(body); } 
             }).then($ => {
-                let body = $("body").text().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-                title = title.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+                let body2 = $("body").text().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+                title2 = title2.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
-                let encontradosA = 
-                    (body.match(new RegExp(respuestasArray[0].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
-                    (title.match(new RegExp(respuestasArray[0].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
-                let encontradosB = 
-                    (body.match(new RegExp(respuestasArray[1].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
-                    (title.match(new RegExp(respuestasArray[1].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
-                let encontradosC = 
-                    (body.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
-                    (title.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
+                let encontradosA2 = 
+                    (body2.match(new RegExp(respuestasArray[0].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
+                    (title2.match(new RegExp(respuestasArray[0].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
+                let encontradosB2 = 
+                    (body2.match(new RegExp(respuestasArray[1].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
+                    (title2.match(new RegExp(respuestasArray[1].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
+                let encontradosC2 = 
+                    (body2.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
+                    (title2.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
 
-                countA += encontradosA
-                countB += encontradosB
-                countC += encontradosC
+                countA2 += encontradosA2
+                countB2 += encontradosB2
+                countC2 += encontradosC2
 
-                if((new Date() - parseoIniciado) / 1000 < 7){
+                if((new Date() - parseoIniciado2) / 1000 < 7){
                     let matriz = [
-                        [respuestasArray[0], countA], 
-                        [respuestasArray[1], countB], 
-                        [respuestasArray[2], countC]
+                        [respuestasArray[0], countA2], 
+                        [respuestasArray[1], countB2], 
+                        [respuestasArray[2], countC2]
                     ]
                     emitSockets('GraficaBing', {
                         matriz: matriz
                     }, socketID)
                 }
 
+                //SEARCH FOR EVERY WORD 
+                let arrayClon2 = [...respuestasArray]  //Clon para prevenir que se modifiquen los valores dentro del array
+                arrayClon2.forEach((resp, index, arr) => {
+                    let split = removeWords(resp).split(" ").filter(el => el.length > 0)
+                    
+                    split.forEach((word, i) => {
+                        let encontrados = 
+                            (body2.match(new RegExp('\\b'+word.normalize('NFD').replace(/[\u0300-\u036f]/g, "")+'\\b', "gi")) || []).length +
+                            (title2.match(new RegExp('\\b'+word.normalize('NFD').replace(/[\u0300-\u036f]/g, "")+'\\b', "gi")) || []).length
+                        
+                        let sum = 0
+                        if(BuscaPalabra[index][i] && BuscaPalabra[index][i].count){
+                            sum = BuscaPalabra[index][i].count
+                        }
+                        BuscaPalabra[index][i] = {
+                            word: word,
+                            count: sum + encontrados
+                        }
+                    });
+                });
+                emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)
+
             }).catch(err => {
-                console.log("error parsing bing link ", link, " ", "at index", " ", i)
+                console.log("error parsing bing link ", link2, " ", "at index", " ", j)
             })
         }
     })
@@ -239,11 +268,11 @@ function emitSockets(nombre, data, socketID){
             socket.emit(nombre, data)
         })
     }
-
 }
 
 function removeWords(str){
-    let words = ["el", "la", "los", "las", "un", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
+    let words = ["el", "la", "los", "las", "se", "por", "ser", "es", "un", "con", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
+
     str = str.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
     //Reemplazar signos

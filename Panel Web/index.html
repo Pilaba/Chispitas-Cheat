@@ -105,6 +105,7 @@
                   <li><a href="#"><i class="fa fa-question-circle" aria-hidden="true"></i>&nbsp;Documentación</a></li>
                 </ul>
               </li>
+              <li><a href="#"><i class="fa fa-clock-o text-success" aria-hidden="true"></i>&nbsp;{{ TIME }} s</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                              
@@ -112,13 +113,6 @@
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>
-      <div class="row">
-        <div class="col-md-12 text-right">
-            <span class="fa fa-clock-o text-success"
-                style="font-size: larger; padding-top: 2px; padding-left: 10px;"> {{ TIME }} s
-            </span>
-        </div>
-      </div>
 
         <div class="row" >
             <div class="col-md-6">
@@ -130,7 +124,7 @@
                
                 <div class="col-md-12">
                     <div id="lista" class="list-group">
-                        <a v-for="(item, index) in itemsBusqueda" v-bind:href="item.link" target="_blank" class="list-group-item-heading">
+                        <a v-if="false" v-for="(item, index) in itemsBusqueda" v-bind:href="item.link" target="_blank" class="list-group-item-heading">
                             {{ item.htmlTitle }}
                             <div class="progress" v-if="item.p">
                                 <div v-bind:style="{width: item.p.A+ '%'}" class="progress-bar progress-bar-success progress-bar-striped"></div>
@@ -153,9 +147,9 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td v-for="array in eachWord">
+                            <td v-for="(array, index) in eachWord" v-bind:class="resaltarTablaIndex == index ? 'alert-success' : ''">
                                 <table class="table table-bordered">
-                                    <tbody v-for="item in array">
+                                    <tbody v-for="item in array" >
                                         <tr>
                                             <td>{{ item.word }}</td>
                                             <td>{{ item.count }}</td>
@@ -227,25 +221,24 @@
                     this.TIME = timeMillis
                 },
                 onQuestion: function(data){
-                    google.search.cse.element.getElement("search").execute(data.pregunta)
-
                     this.pregunta = data.pregunta
                     this.respuestas = data.respuestas
                     this.itemsBusqueda = data.items
+
+                    google.search.cse.element.getElement("search").execute(data.pregunta)
                 },
                 onGoogle: function(data){
+                    /*
                     var array = data.dataExta.extra
                     var suma = array.reduce((a,b) => a+b)
                     var indice = data.dataExta.indice
-                    
                     if(this.itemsBusqueda[indice] != undefined){
                         this.itemsBusqueda[indice].p = {
                             A : array[0] * 100 / suma,
                             B : array[1] * 100 / suma,
                             C : array[2] * 100 / suma
                         }
-                    }
-
+                    }*/
                     drawGrafica(data.matriz, 'googleGrafica', 'GOOGLE afirma que: ')
                 },
                 onBing: function(data){
@@ -257,6 +250,18 @@
                 submit: function(event){
                     this.socket.emit("REquestion", {q: this.REquestion, id: this.socket.id })
                 },
+            },
+            computed: {
+                resaltarTablaIndex: function(){
+                    let sumas = []
+                    this.eachWord.forEach((arrr, index) =>  {
+                        let count = 0
+                        arrr.forEach(el => count += parseInt(el.count))
+
+                        sumas[index] = count
+                    })
+                    return sumas.indexOf(Math.max(...sumas))
+                }
             }
         });
 

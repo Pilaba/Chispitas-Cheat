@@ -18,7 +18,6 @@
     <meta property="og:url" content="" />
     <base href="" />
 
-
     <!-- Google charts, boostrap 3, JQuery, SocketIO -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
@@ -105,6 +104,7 @@
                   <li><a href="#"><i class="fa fa-question-circle" aria-hidden="true"></i>&nbsp;Documentación</a></li>
                 </ul>
               </li>
+              <li><a href="#" data-toggle="collapse" data-target="#pruebaForm"><i class="fa fa-paste" aria-hidden="true" ></i>&nbsp;Pruebas</a></li>
               <li><a href="#"><i class="fa fa-clock-o text-success" aria-hidden="true"></i>&nbsp;{{ TIME }} s</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
@@ -113,6 +113,16 @@
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
       </nav>
+
+        <div class="row collapse" id="pruebaForm">
+            <div class="col-md-12">
+                <input type="text" v-model="pregunta" style='width:30em'>
+                <input type="text" v-model="respuestas[0]">
+                <input type="text" v-model="respuestas[1]">
+                <input type="text" v-model="respuestas[2]">
+                <button type="submit" v-on:click="submitPrueba"  class="btn btn-primary"> GO! </button>
+            </div>
+        </div>
 
         <div class="row" >
             <div class="col-md-6">
@@ -228,17 +238,6 @@
                     google.search.cse.element.getElement("search").execute(data.pregunta)
                 },
                 onGoogle: function(data){
-                    /*
-                    var array = data.dataExta.extra
-                    var suma = array.reduce((a,b) => a+b)
-                    var indice = data.dataExta.indice
-                    if(this.itemsBusqueda[indice] != undefined){
-                        this.itemsBusqueda[indice].p = {
-                            A : array[0] * 100 / suma,
-                            B : array[1] * 100 / suma,
-                            C : array[2] * 100 / suma
-                        }
-                    }*/
                     drawGrafica(data.matriz, 'googleGrafica', 'GOOGLE afirma que: ')
                 },
                 onBing: function(data){
@@ -250,6 +249,10 @@
                 submit: function(event){
                     this.socket.emit("REquestion", {q: this.REquestion, id: this.socket.id })
                 },
+                submitPrueba: function(data){
+                    console.log({q: this.pregunta, respuestas: this.respuestas, id: this.socket.id });
+                    this.socket.emit("Pruebas", {q: this.pregunta, respuestas: this.respuestas, id: this.socket.id })
+                }
             },
             computed: {
                 resaltarTablaIndex: function(){

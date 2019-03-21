@@ -14,9 +14,16 @@ io.on('connection', function (socket) {
     coneccionesSocket.push(socket);
     socket.on("disconnect", () => { //Disconected guy
         coneccionesSocket.splice(coneccionesSocket.indexOf(socket), 1) 
-    })
+    });
+
     socket.on("REquestion", (data) => {
         isGoogling = true;
+        googleSearch(data.q, respuestasArray, data.id)
+        bingSearch(data.q, respuestasArray, data.id)
+    });
+
+    socket.on("Pruebas", (data) => {
+        respuestasArray = data.respuestas
         googleSearch(data.q, respuestasArray, data.id)
         bingSearch(data.q, respuestasArray, data.id)
     })
@@ -271,7 +278,7 @@ function emitSockets(nombre, data, socketID){
 }
 
 function removeWords(str){
-    let words = ["el", "la", "los", "las", "se", "por", "ser", "es", "un", "con", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
+    let words = ["el", "la", "los", "me", "fue", "las", "se", "por", "ser", "es", "un", "con", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
 
     str = str.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 

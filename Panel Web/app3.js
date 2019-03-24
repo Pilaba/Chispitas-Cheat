@@ -1,7 +1,15 @@
+//Https setup
+const fs = require('fs');
+var options = {
+    key: fs.readFileSync('chispitas.sytes.net.key'),
+    cert: fs.readFileSync('chispitas.sytes.net.crt')
+};
+
 //Web setup
 const app = require("express")();
-const http = require('http').createServer(app);
+const http = require('http').createServer(options, app);
 const io = require("socket.io").listen(http);
+
 //Dengurs - Autorizar sitios https con certificado caduco o auto firmado
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  
 

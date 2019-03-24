@@ -1,4 +1,3 @@
-"use strict";
 //Web setup
 const app = require("express")();
 const http = require('http').createServer(app);
@@ -26,7 +25,7 @@ io.on('connection', function (socket) {
         respuestasArray = data.respuestas
         googleSearch(data.q, respuestasArray, data.id)
         bingSearch(data.q, respuestasArray, data.id)
-    })
+    });
 });
 
 //Variable global para accesso desde la funcion googleSearch y bingSearch
@@ -51,26 +50,24 @@ app.post("/", (req, res, next) => {
     var inicio = new Date();
 
     req.busboy.on('field', (fieldname, data, filename, encoding, mimetype) => {
-        let bufferFile = Buffer.from(data, 'base64')
-        let pregunta = sharp(bufferFile).resize(480, 135 ,{position : "top"}).toBuffer()
-        let respuestas = sharp(bufferFile).resize(480, 270, {position : "bottom"}).toBuffer()
+        let bufferImage = Buffer.from(data, 'base64')
 
-        Promise.all([pregunta, respuestas]).then(bufferImagenes => {
-            let resultadoPregunta = client.textDetection( {image: { content: bufferImagenes[0] }} )
-            let resultadoRespuestas= client.textDetection( {image: { content: bufferImagenes[1] }} )
+        let OCR = client.textDetection( {image: { content: bufferImage }} )
 
-            return Promise.all([resultadoPregunta, resultadoRespuestas])
-        }).then(textImages => {
-            let pregunta = textImages[0][0].fullTextAnnotation.text
-                .replace("\n", " ").replace(/\r?\n|\r/g, " ")    //Replace all white spaces and new lines
-            if(pregunta.match(/^\d/)){                           //Remover al inicio de algunas preguntas en Q12
-                pregunta = pregunta.substring(4, pregunta.lenght);
-            }
+        OCR.then(data => {
+            let textoArray = data[0].fullTextAnnotation.text
+                .split("\n")
+                .filter(item => item.trim() != "" ) //Remueve elementos vacios
 
-            respuestasArray = textImages[1][0].fullTextAnnotation.text
-                .split("\n").filter(word => word.length > 0);   //replace empty words
-            console.log(`P: ${pregunta} \nR: ${respuestasArray}`);
+            let pregunta = textoArray.splice(0, textoArray.length-3).join(" ")  //Remueve del array la pregunta
+            //Remover el numero de inicio en algunas preguntas de Q12
+            if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
+            //Se eliminan articulos, signos etc de la pregunta
+            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
+            respuestasArray = textoArray    //El array restante se toma como las respuestas [A, B, C]
+            return pregunta
+        }).then((pregunta)=> {
             ///// Google Search
             googleSearch(pregunta, respuestasArray)
 
@@ -81,9 +78,8 @@ app.post("/", (req, res, next) => {
             let time = ( new Date() - inicio ) / 1000
             console.log("TIME TO PROCESS ", time);
             emitSockets('T', time)
-            
         }).catch(err => {
-            console.log("error file")
+            console.log("error file ", err)
         })
 
         //Terminar la conexion
@@ -234,6 +230,7 @@ function bingSearch(pregunta, respuestasArray, socketID){
                 }
 
                 //SEARCH FOR EVERY WORD 
+                /* 
                 let arrayClon2 = [...respuestasArray]  //Clon para prevenir que se modifiquen los valores dentro del array
                 arrayClon2.forEach((resp, index, arr) => {
                     let split = removeWords(resp).split(" ").filter(el => el.length > 0)
@@ -253,7 +250,7 @@ function bingSearch(pregunta, respuestasArray, socketID){
                         }
                     });
                 });
-                emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)
+                emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)*/
 
             }).catch(err => {
                 console.log("error parsing bing link ", link2, " ", "at index", " ", j)
@@ -278,12 +275,12 @@ function emitSockets(nombre, data, socketID){
 }
 
 function removeWords(str){
-    let words = ["el", "la", "los", "me", "fue", "las", "se", "por", "ser", "es", "un", "con", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
+    let words = ["el", "la", "que", "de", "cual", "estas", "estos", "siguientes", "le", "los", "me", "fue", "las", "se", "por", "ser", "es", "un", "con", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
 
     str = str.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
     //Reemplazar signos
-    str = str.replace(/,|;|\.|\*|:|-|_|'|"|´|`/g, "")
+    str = str.replace(/,|;|\.|\*|:|-|_|\?|\¿|'|"|´|`/g, "")
     
     //Reemplazar palabras
     words.forEach(el => {

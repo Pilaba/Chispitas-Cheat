@@ -1,13 +1,14 @@
 //Https setup
+/*
 const fs = require('fs');
 var options = {
     key: fs.readFileSync('chispitas.sytes.net.key'),
     cert: fs.readFileSync('chispitas.sytes.net.crt')
-};
+};*/
 
 //Web setup
 const app = require("express")();
-const http = require('https').createServer(options, app);
+const http = require('http').createServer(app);
 const io = require("socket.io").listen(http);
 
 //Dengurs - Autorizar sitios https con certificado caduco o auto firmado
@@ -302,7 +303,7 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
 })
 
-var port = process.env.PORT || 443
+var port = process.env.PORT || 80
 http.listen(port, function() {
     console.log("To view your app, open this link in your browser: http://localhost:" + port);
 });

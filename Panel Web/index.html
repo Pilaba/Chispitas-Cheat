@@ -39,38 +39,33 @@
         google.charts.load("current", {packages:["corechart"]});
         google.charts.setOnLoadCallback(chartLoaded);
         function chartLoaded(){
-            drawGrafica([['Messi', 70], ['Hulk', 25], ['Fernando alonso', 5]], undefined, "x")
+            drawGrafica()
         }
 
-        function drawGrafica(respuestas, chartID, title){
+        function drawGrafica(){
             var data = google.visualization.arrayToDataTable([
                 ['Respuestas', 'Cantidad'],
-                respuestas[0],
-                respuestas[1],
-                respuestas[2]
+                [app.respuestas[0], app.graficaData[0]],
+                [app.respuestas[1], app.graficaData[1]],
+                [app.respuestas[2], app.graficaData[2]]
             ]);
 
+            //Determinar mayor para hacer slice
+            let maxIndex =  app.graficaData.indexOf(Math.max(...app.graficaData));
+            let obj = {}; obj[maxIndex] = {offset: 0.1};
+
             var options = {
-                title: title,
+                title: 'GOOGLE y BING sugieren que:',
                 is3D:true, 
                 colors:['#5cb85c', '#f0ad4e', '#d9534f'],
                 pieSliceText: 'label',
-                chartArea:{left:10, top:0, width:"100%", height:"100%"},
-                legend: {position :"left", alignment : "center", textStyle: {fontSize: 16, bold : true}}
+                chartArea:{left:10, top:10, bottom: 10, right: 10, width:"100%", height:"100%"},
+                legend: {position :"left", alignment : "center", textStyle: {fontSize: 16, bold : true}},
+                slices: obj
             };
 
-            if(chartID == undefined){
-                options['title']    =   "GOOGLE afirma que: ";
-                var chart = new google.visualization.PieChart(document.getElementById('googleGrafica'));
-                chart.draw(data, options);
-
-                options['title']    =   "BING dice que: ";
-                var chart2 = new google.visualization.PieChart(document.getElementById('bingGrafica'));
-                chart2.draw(data, options);
-            }else{
-                var chart = new google.visualization.PieChart(document.getElementById(chartID));
-                chart.draw(data, options);
-            }
+            var chart = new google.visualization.PieChart(document.getElementById('Grafica'));
+            chart.draw(data, options);
         }
     </script>
 
@@ -129,48 +124,36 @@
                 <h2 class="btn btn-default btn-flat" style="width: 100%; font-size: large; white-space:normal !important; word-wrap: break-word;">
                     {{ pregunta }}
                 </h2>
-                <div id="googleGrafica" class="col-md-12" style="height: 240px;"></div>
-                <div id="bingGrafica" class="col-md-12" style="height: 240px;"></div>
+                <div id="Grafica" class="col-md-12" style="height: 280px;"></div>
                
                 <div class="col-md-12">
-                    <div id="lista" class="list-group">
-                        <a v-if="false" v-for="(item, index) in itemsBusqueda" v-bind:href="item.link" target="_blank" class="list-group-item-heading">
-                            {{ item.htmlTitle }}
-                            <div class="progress" v-if="item.p">
-                                <div v-bind:style="{width: item.p.A+ '%'}" class="progress-bar progress-bar-success progress-bar-striped"></div>
-                                <div v-bind:style="{width: item.p.B+ '%'}" class="progress-bar progress-bar-warning progress-bar-striped"></div>
-                                <div v-bind:style="{width: item.p.C+ '%'}" class="progress-bar progress-bar-danger  progress-bar-striped"></div>
-                            </div>
-                        </a>
-                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{{ respuestas[0] }}</th>
+                                <th>{{ respuestas[1] }}</th>
+                                <th>{{ respuestas[2] }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td v-for="(array, index) in eachWord" v-bind:class="resaltarTablaIndex == index ? 'alert-success' : ''">
+                                    <table class="table table-bordered">
+                                        <tbody v-for="item in array" >
+                                            <tr>
+                                                <td>{{ item.word }}</td>
+                                                <td>{{ item.count }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
             <div class="col-md-6">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>{{ respuestas[0] }}</th>
-                            <th>{{ respuestas[1] }}</th>
-                            <th>{{ respuestas[2] }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td v-for="(array, index) in eachWord" v-bind:class="resaltarTablaIndex == index ? 'alert-success' : ''">
-                                <table class="table table-bordered">
-                                    <tbody v-for="item in array" >
-                                        <tr>
-                                            <td>{{ item.word }}</td>
-                                            <td>{{ item.count }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-        
                 <div class="col-md-9" style="padding: 20px">
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
                     <input v-model="REquestion" v-on:keyup.enter="submit" type="text" class="col-md-12 form-control">
@@ -216,14 +199,14 @@
                     {link: "https://taringa.net", htmlTitle: "Messi el hormonado", p: {A:90, B:5, C:5}}
                 ], 
                 eachWord: [ [{word: "Messi", count : "20"}], [{word: "Hulk", count : "8"}], 
-                            [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ]
+                            [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ],
+                graficaData: [20, 8, 3]
             },
             created: function () {
                 this.socket = io.connect();
                 this.socket.on('T', this.onTime)
                 this.socket.on('Q', this.onQuestion)
-                this.socket.on('GraficaGoogle', this.onGoogle)
-                this.socket.on('GraficaBing', this.onBing)
+                this.socket.on('Grafica', this.onGrafica)
                 this.socket.on('EachWordSeach', this.onEachWordSeach)
             },
             methods: {
@@ -231,17 +214,20 @@
                     this.TIME = timeMillis
                 },
                 onQuestion: function(data){
+                    //reset grafica data
+                    this.graficaData = [0, 0, 0]
+
                     this.pregunta = data.pregunta
                     this.respuestas = data.respuestas
                     this.itemsBusqueda = data.items
 
                     google.search.cse.element.getElement("search").execute(data.pregunta)
                 },
-                onGoogle: function(data){
-                    drawGrafica(data.matriz, 'googleGrafica', 'GOOGLE afirma que: ')
-                },
-                onBing: function(data){
-                    drawGrafica(data.matriz, 'bingGrafica', 'BING dice que: ')
+                onGrafica: function(data){
+                    this.graficaData = this.graficaData.map((item, i) => {
+                        return item + data.array[i]
+                    })
+                    drawGrafica()
                 },
                 onEachWordSeach: function(data){
                     this.eachWord = data.matriz

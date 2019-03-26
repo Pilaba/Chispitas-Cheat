@@ -1,11 +1,3 @@
-//Https setup
-/*
-const fs = require('fs');
-var options = {
-    key: fs.readFileSync('chispitas.sytes.net.key'),
-    cert: fs.readFileSync('chispitas.sytes.net.crt')
-};*/
-
 //Web setup
 const app = require("express")();
 const http = require('http').createServer(app);
@@ -17,7 +9,6 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 //SocketIO setup
 let coneccionesSocket = []
 let respuestasArray = []
-let isGoogling = false
 io.on('connection', function (socket) {
     coneccionesSocket.push(socket);
     socket.on("disconnect", () => { //Disconected guy
@@ -25,7 +16,6 @@ io.on('connection', function (socket) {
     });
 
     socket.on("REquestion", (data) => {
-        isGoogling = true;
         googleSearch(data.q, respuestasArray, data.id)
         bingSearch(data.q, respuestasArray, data.id)
     });
@@ -111,8 +101,6 @@ function googleSearch(pregunta, respuestasArray, socketID){
         let resultados = $("div.g")
         let items = []
 
-        let countA = 0, countB = 0, countC = 0;
-
         for (let i = 0; i < resultados.length; i++) {
             let title = $(resultados[i]).find("h3").text();
             let link = $(resultados[i]).find(".r > a").attr("href");
@@ -140,19 +128,9 @@ function googleSearch(pregunta, respuestasArray, socketID){
                         (body.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
                         (title.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
 
-                    countA += encontradosA
-                    countB += encontradosB
-                    countC += encontradosC
-
                     if((new Date() - parseoIniciado) / 1000 < 7){
-                        let matriz = [
-                            [respuestasArray[0], countA], 
-                            [respuestasArray[1], countB], 
-                            [respuestasArray[2], countC]
-                        ]
-                        emitSockets('GraficaGoogle', {
-                            matriz: matriz,
-                            dataExta: {indice:i, extra: [encontradosA, encontradosB, encontradosC] }
+                        emitSockets('Grafica', {
+                            array: [encontradosA, encontradosB, encontradosC]
                         }, socketID)
                     }
 
@@ -223,18 +201,9 @@ function bingSearch(pregunta, respuestasArray, socketID){
                     (body2.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length +
                     (title2.match(new RegExp(respuestasArray[2].normalize('NFD').replace(/[\u0300-\u036f]/g, ""), "gi")) || []).length
 
-                countA2 += encontradosA2
-                countB2 += encontradosB2
-                countC2 += encontradosC2
-
                 if((new Date() - parseoIniciado2) / 1000 < 7){
-                    let matriz = [
-                        [respuestasArray[0], countA2], 
-                        [respuestasArray[1], countB2], 
-                        [respuestasArray[2], countC2]
-                    ]
-                    emitSockets('GraficaBing', {
-                        matriz: matriz
+                    emitSockets('Grafica', {
+                        array: [encontradosA2, encontradosB2, encontradosC2]
                     }, socketID)
                 }
 

@@ -2,6 +2,8 @@
 const app = require("express")();
 const http = require('http').createServer(app);
 const io = require("socket.io").listen(http);
+const fs = require("fs")
+const path = require("path")
 
 //Dengurs - Autorizar sitios https con certificado caduco o auto firmado
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  
@@ -50,6 +52,8 @@ app.post("/", (req, res, next) => {
 
     req.busboy.on('field', (fieldname, data, filename, encoding, mimetype) => {
         let bufferImage = Buffer.from(data, 'base64')
+        //Guardar imagen asyndron
+        fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
 
         let OCR = client.textDetection( {image: { content: bufferImage }} )
 
@@ -62,7 +66,7 @@ app.post("/", (req, res, next) => {
             //Remover el numero de inicio en algunas preguntas de Q12
             if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
             //Se eliminan articulos, signos etc de la pregunta
-            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+            //pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
             respuestasArray = textoArray    //El array restante se toma como las respuestas [A, B, C]
             return pregunta

@@ -8,25 +8,34 @@
     android:background="@android:color/transparent"
     android:id="@+id/ROOT">
 
-    <ImageButton android:id="@+id/STOP"
-        android:src="@drawable/stop"
-        android:layout_width="48dp"
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/STOP"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="64dp"
         android:layout_height="0dp"
         android:layout_margin="10dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/custom_btn"
+        android:elevation="4dp"
         android:padding="10dp"
+        android:src="@drawable/stop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.8" />
 
-    <Button
+    <android.support.v7.widget.AppCompatButton
         android:id="@+id/GO"
+        style="?android:attr/borderlessButtonStyle"
+        android:background="@drawable/custom_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:drawableStart="@drawable/go"
         android:padding="15dp"
-        android:text="   GO  !"
+        android:text="  GO !"
         android:textColor="@color/colorAccent"
+        android:elevation="4dp"
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

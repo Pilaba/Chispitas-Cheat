@@ -236,7 +236,6 @@
                     this.socket.emit("REquestion", {q: this.REquestion, id: this.socket.id })
                 },
                 submitPrueba: function(data){
-                    console.log({q: this.pregunta, respuestas: this.respuestas, id: this.socket.id });
                     this.socket.emit("Pruebas", {q: this.pregunta, respuestas: this.respuestas, id: this.socket.id })
                 }
             },
@@ -244,11 +243,12 @@
                 resaltarTablaIndex: function(){
                     let sumas = []
                     this.eachWord.forEach((arrr, index) =>  {
-                        let count = 0
-                        arrr.forEach(el => count += parseInt(el.count))
+                        let count = 1
+                        arrr.forEach(el => count *= parseInt(el.count))
 
                         sumas[index] = count
                     })
+
                     return sumas.indexOf(Math.max(...sumas))
                 }
             }

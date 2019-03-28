@@ -249,6 +249,13 @@
                         sumas[index] = count
                     })
 
+                    if(Math.max(...sumas) == 0){
+                        let count = 0
+                        arrr.forEach(el => count += parseInt(el.count))
+
+                        sumas[index] = count
+                    }
+
                     return sumas.indexOf(Math.max(...sumas))
                 }
             }

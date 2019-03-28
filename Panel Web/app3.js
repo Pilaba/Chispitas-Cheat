@@ -66,7 +66,7 @@ app.post("/", (req, res, next) => {
             //Remover el numero de inicio en algunas preguntas de Q12
             if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
             //Se eliminan articulos, signos etc de la pregunta
-            //pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
             respuestasArray = textoArray    //El array restante se toma como las respuestas [A, B, C]
             return pregunta
@@ -257,7 +257,7 @@ function emitSockets(nombre, data, socketID){
 }
 
 function removeWords(str){
-    let words = ["el", "la", "que", "de", "cual", "estas", "estos", "siguientes", "le", "los", "me", "fue", "las", "se", "por", "ser", "es", "un", "con", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
+    let words = ["el", "la", "que", "e", "mi", "de", "cual", "estas", "estos", "siguientes", "le", "los", "me", "fue", "las", "se", "por", "ser", "es", "un", "con", "una", "unos", "unas", "de", "del", "al", "y", "o","en", "tu", "mis", "para", "no", "si", "su", "sus", "a"]
 
     str = str.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 

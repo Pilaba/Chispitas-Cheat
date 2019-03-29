@@ -57,7 +57,7 @@
             var options = {
                 title: 'GOOGLE y BING sugieren que:',
                 is3D:true, 
-                colors:['#5cb85c', '#f0ad4e', '#d9534f'],
+                colors:['#10971e', '#000000', '#ff0000'],
                 pieSliceText: 'label',
                 chartArea:{left:10, top:10, bottom: 10, right: 10, width:"100%", height:"100%"},
                 legend: {position :"left", alignment : "center", textStyle: {fontSize: 16, bold : true}},
@@ -130,14 +130,14 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>{{ respuestas[0] }}</th>
-                                <th>{{ respuestas[1] }}</th>
-                                <th>{{ respuestas[2] }}</th>
+                                <th style="color: green">{{ respuestas[0] }}</th>
+                                <th style="color: black">{{ respuestas[1] }}</th>
+                                <th style="color: red">{{ respuestas[2] }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td v-for="(array, index) in eachWord" v-bind:class="resaltarTablaIndex == index ? 'alert-success' : ''">
+                                <td v-for="(array, index) in eachWord" v-bind:class="resaltarTablaIndex == index ? 'alert alert-info' : ''">
                                     <table class="table table-bordered">
                                         <tbody v-for="item in array" >
                                             <tr>
@@ -216,6 +216,7 @@
                 onQuestion: function(data){
                     //reset grafica data
                     this.graficaData = [0, 0, 0]
+                    this.eachWord = [[{}], [{}], [{}]]
 
                     this.pregunta = data.pregunta
                     this.respuestas = data.respuestas

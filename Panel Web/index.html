@@ -151,8 +151,10 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="col-md-12" v-html="googleHeaderHTML"> </div>
             </div>
 
+            
             <div class="col-md-6">
                 <div class="col-md-9" style="padding: 20px">
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
@@ -200,7 +202,8 @@
                 ], 
                 eachWord: [ [{word: "Messi", count : "20"}], [{word: "Hulk", count : "8"}], 
                             [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ],
-                graficaData: [20, 8, 3]
+                graficaData: [20, 8, 3],
+                googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>'
             },
             created: function () {
                 this.socket = io.connect();
@@ -208,21 +211,23 @@
                 this.socket.on('Q', this.onQuestion)
                 this.socket.on('Grafica', this.onGrafica)
                 this.socket.on('EachWordSeach', this.onEachWordSeach)
+                this.socket.on('googleHeader', this.onGoogleHeader)
             },
             methods: {
                 onTime: function(timeMillis){
                     this.TIME = timeMillis
                 },
                 onQuestion: function(data){
-                    //reset grafica data
+                    //reset data
                     this.graficaData = [0, 0, 0]
                     this.eachWord = [[{}], [{}], [{}]]
+                    this.eachWord = ""
 
                     this.pregunta = data.pregunta
                     this.respuestas = data.respuestas
                     this.itemsBusqueda = data.items
 
-                    google.search.cse.element.getElement("search").execute(data.pregunta)
+                    google.search.cse.element.getElement("search").execute(this.pregunta)
                 },
                 onGrafica: function(data){
                     this.graficaData = this.graficaData.map((item, i) => {
@@ -230,10 +235,14 @@
                     })
                     drawGrafica()
                 },
+                onGoogleHeader: function(data) {
+                    this.googleHeaderHTML = data.htmlHeader
+                },
                 onEachWordSeach: function(data){
                     this.eachWord = data.matriz
                 },
                 submit: function(event){
+                    this.eachWord = ""
                     this.socket.emit("REquestion", {q: this.REquestion, id: this.socket.id })
                 },
                 submitPrueba: function(data){

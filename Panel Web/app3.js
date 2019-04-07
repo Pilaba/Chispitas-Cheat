@@ -29,15 +29,10 @@ io.on('connection', function (socket) {
     });
 });
 
-//Variable global para accesso desde la funcion googleSearch y bingSearch
-//Y llevar un control sobre las incidencias de cada palabra en ambos motores
-let BuscaPalabra;
-
 //3rd party Libraries setup
 const busboy = require('connect-busboy');
 const GET = require('request-promise');                          // api rest client
 const cheerio = require('cheerio');                              // Basically jQuery for node.js
-const sharp = require('sharp');                                  // Cortar imagenes
 const vision = require('@google-cloud/vision');                  // google vision api
 const client = new vision.ImageAnnotatorClient({
     projectId: 'cloudapi-test-230302',
@@ -92,7 +87,7 @@ app.post("/", (req, res, next) => {
 
 function googleSearch(pregunta, respuestasArray, socketID){
     //Resetear cotador de incidencias para cada palabra
-    BuscaPalabra = [[{}], [{}], [{}]]
+    let BuscaPalabra = [[{}], [{}], [{}]]
 
     GET({
         uri: "https://www.google.com.mx/search",
@@ -165,8 +160,18 @@ function googleSearch(pregunta, respuestasArray, socketID){
                 })
             }
         }
-
         emitSockets('Q', {pregunta: pregunta, respuestas: respuestasArray, items: items}, socketID)
+
+        //Google header 
+        let googleHeaderRoot = $("div.ifM9O")
+        if(googleHeaderRoot.text().trim() != ""){
+            let cabeza = $(googleHeaderRoot).find(".kp-header")
+            $(cabeza).find(".LEsW6e").remove()
+            let cuerpo = $(googleHeaderRoot).find(".SALvLe")
+            $(cuerpo).find(".LEsW6e").remove()
+
+            emitSockets("googleHeader", { htmlHeader: cabeza.html() + cuerpo.html()})
+        }
     })
 }
 

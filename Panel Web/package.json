@@ -20,7 +20,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "pm2 start app3.js -i max --node-args='--max_old_space_size=2560'",
+    "start": "pm2 start app3.js --node-args='--max_old_space_size=2560'",
     "stop": "pm2 stop all",
     "restart": "pm2 restart all"
   },

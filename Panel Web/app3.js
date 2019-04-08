@@ -170,7 +170,9 @@ function googleSearch(pregunta, respuestasArray, socketID){
             let cuerpo = $(googleHeaderRoot).find(".SALvLe")
             $(cuerpo).find(".LEsW6e").remove()
 
-            emitSockets("googleHeader", { htmlHeader: cabeza.html() + cuerpo.html()})
+            let container = $(googleHeaderRoot).find(".rl_container") 
+
+            emitSockets("googleHeader", { htmlHeader: cabeza.html() + container.html() + cuerpo.html() })
         }
     })
 }

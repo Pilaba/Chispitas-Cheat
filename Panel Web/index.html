@@ -96,14 +96,14 @@
                   <li><a href="#"><i class="fa fa-cutlery" aria-hidden="true"></i>&nbsp;Corridas</a></li>
                   <li><a href="#"><i class="fa fa-pie-chart" aria-hidden="true"></i>&nbsp;Estadísticas</a></li>
                    <li role="separator" class="divider"></li>
-                  <li><a href="#"><i class="fa fa-question-circle" aria-hidden="true"></i>&nbsp;Documentación</a></li>
+                   <li><a href="#"><i class="fa fa-question-circle" aria-hidden="true"></i>&nbsp;Documentación</a></li>
                 </ul>
               </li>
               <li><a href="#" data-toggle="collapse" data-target="#pruebaForm"><i class="fa fa-paste" aria-hidden="true" ></i>&nbsp;Pruebas</a></li>
               <li><a href="#"><i class="fa fa-clock-o text-success" aria-hidden="true"></i>&nbsp;{{ TIME }} s</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                             
+              <li><a href="#"><i class="fa fa-line-chart text-success" aria-hidden="true">
+                  </i>&nbsp;{{ linksParseados }}</a>
+              </li>
             </ul>
           </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
@@ -203,7 +203,8 @@
                 eachWord: [ [{word: "Messi", count : "20"}], [{word: "Hulk", count : "8"}], 
                             [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ],
                 graficaData: [20, 8, 3],
-                googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>'
+                googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>',
+                linksParseados: 0
             },
             created: function () {
                 this.socket = io.connect();
@@ -222,6 +223,7 @@
                     this.graficaData = [0, 0, 0]
                     this.eachWord = [[{}], [{}], [{}]]
                     this.eachWord = ""
+                    this.linksParseados = 0
 
                     this.pregunta = data.pregunta
                     this.respuestas = data.respuestas
@@ -230,6 +232,7 @@
                     google.search.cse.element.getElement("search").execute(this.pregunta)
                 },
                 onGrafica: function(data){
+                    this.linksParseados++ 
                     this.graficaData = this.graficaData.map((item, i) => {
                         return item + data.array[i]
                     })
@@ -242,7 +245,10 @@
                     this.eachWord = data.matriz
                 },
                 submit: function(event){
+                    //Reset data
                     this.eachWord = ""
+                    this.linksParseados = 0
+
                     this.socket.emit("REquestion", {q: this.REquestion, id: this.socket.id })
                 },
                 submitPrueba: function(data){
@@ -256,14 +262,16 @@
                         let count = 1
                         arrr.forEach(el => count *= parseInt(el.count))
 
-                        sumas[index] = count
+                        sumas[index] = (count / arrr.length)
                     })
 
                     if(Math.max(...sumas) == 0){
-                        let count = 0
-                        arrr.forEach(el => count += parseInt(el.count))
+                        this.eachWord.forEach((arrr, index) =>  {
+                            let count = 0
+                            arrr.forEach(el => count += parseInt(el.count))
 
-                        sumas[index] = count
+                            sumas[index] = (count / arrr.length)
+                        })
                     }
 
                     return sumas.indexOf(Math.max(...sumas))

@@ -11,6 +11,7 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 //SocketIO setup
 let coneccionesSocket = []
 let respuestasArray = []
+let activeRequest = []
 io.on('connection', function (socket) {
     coneccionesSocket.push(socket);
     socket.on("disconnect", () => { //Disconected guy
@@ -18,8 +19,11 @@ io.on('connection', function (socket) {
     });
 
     socket.on("REquestion", (data) => {
-        googleSearch(data.q, respuestasArray, data.id)
-        bingSearch(data.q, respuestasArray, data.id)
+        activeRequest.forEach(req => {
+            req.abort();
+        });
+        googleSearch(data.q, respuestasArray, data.id, true)
+        bingSearch(data.q, respuestasArray, data.id, true)
     });
 
     socket.on("Pruebas", (data) => {
@@ -51,7 +55,7 @@ app.post("/", (req, res, next) => {
         fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
 
         let OCR = client.textDetection( {image: { content: bufferImage }} )
-
+        
         OCR.then(data => {
             let textoArray = data[0].fullTextAnnotation.text
                 .split("\n")
@@ -88,13 +92,14 @@ app.post("/", (req, res, next) => {
 function googleSearch(pregunta, respuestasArray, socketID){
     //Resetear cotador de incidencias para cada palabra
     let BuscaPalabra = [[{}], [{}], [{}]]
+    activeRequest = []
 
     GET({
         uri: "https://www.google.com.mx/search",
         headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
         qs: {
             q : pregunta,
-            count : 15
+            count : 12
         }, transform: function (body) { return cheerio.load(body); } 
     }).then($ => {
         let resultados = $("div.g")
@@ -109,11 +114,14 @@ function googleSearch(pregunta, respuestasArray, socketID){
                 link = link.substring(link.indexOf("http"), link.indexOf("&sa=")) || link;
                 items.push({link : link, htmlTitle : title})
             
-                GET({
+                let request = GET({
                     uri: link,
                     headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
                     transform: function (body) { return cheerio.load(body); } 
-                }).then($ => {
+                })
+                activeRequest.push(request);
+
+                request.then($ => {
                     let body = $("body").text().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
                     title = title.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
@@ -183,7 +191,7 @@ function bingSearch(pregunta, respuestasArray, socketID){
         headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
         qs: {
             q : pregunta,
-            count : 15
+            count : 12
         }, transform: function (body) { return cheerio.load(body); } 
     }).then($ => {
         let resultados2 = $("#b_results > li.b_algo")
@@ -194,11 +202,14 @@ function bingSearch(pregunta, respuestasArray, socketID){
             let link2 = $(resultados2[j]).find("h2 > a").attr("href");
             let parseoIniciado2 = new Date();
 
-            GET({
+            let requestB = GET({
                 uri: link2,
                 headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
                 transform: function (body) { return cheerio.load(body); } 
-            }).then($ => {
+            })
+            activeRequest.push(requestB);
+
+            requestB.then($ => {
                 let body2 = $("body").text().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
                 title2 = title2.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 

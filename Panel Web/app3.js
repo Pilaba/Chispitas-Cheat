@@ -1,7 +1,7 @@
 //Web setup
-const app = require("express")();
-const http = require('http').createServer(app);
-const io = require("socket.io").listen(http);
+const app = require("express")()
+const http = require('http').createServer(app)
+const io = require("socket.io").listen(http)
 const fs = require("fs")
 const path = require("path")
 
@@ -9,29 +9,23 @@ const path = require("path")
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  
 
 //SocketIO setup
-let coneccionesSocket = []
 let respuestasArray = []
 let activeRequest = []
 io.on('connection', function (socket) {
-    coneccionesSocket.push(socket);
-    socket.on("disconnect", () => { //Disconected guy
-        coneccionesSocket.splice(coneccionesSocket.indexOf(socket), 1) 
-    });
-
     socket.on("REquestion", (data) => {
         activeRequest.forEach(req => {
             req.abort();
         });
         googleSearch(data.q, respuestasArray, data.id, true)
         bingSearch(data.q, respuestasArray, data.id, true)
-    });
+    })
 
     socket.on("Pruebas", (data) => {
         respuestasArray = data.respuestas
         googleSearch(data.q, respuestasArray, data.id)
         bingSearch(data.q, respuestasArray, data.id)
-    });
-});
+    })
+})
 
 //3rd party Libraries setup
 const busboy = require('connect-busboy');
@@ -41,9 +35,9 @@ const vision = require('@google-cloud/vision');                  // google visio
 const client = new vision.ImageAnnotatorClient({
     projectId: 'cloudapi-test-230302',
     keyFilename: './GoogleVisioApiCred.json'
-});
-app.use(busboy({ immediate: true }));
-app.use(require("serve-favicon")(__dirname + '/favicon.ico'));
+})
+app.use(busboy({ immediate: true }))
+app.use(require("serve-favicon")(__dirname + '/favicon.ico'))
 
 app.post("/", (req, res, next) => {
     //INIT TIME
@@ -51,7 +45,7 @@ app.post("/", (req, res, next) => {
 
     req.busboy.on('field', (fieldname, data, filename, encoding, mimetype) => {
         let bufferImage = Buffer.from(data, 'base64')
-        //Guardar imagen asyndron
+        //Guardar imagen async
         fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
 
         let OCR = client.textDetection( {image: { content: bufferImage }} )
@@ -87,7 +81,7 @@ app.post("/", (req, res, next) => {
         //Terminar la conexion
         res.end();
     })
-});
+})
 
 function googleSearch(pregunta, respuestasArray, socketID){
     //Resetear cotador de incidencias para cada palabra
@@ -175,6 +169,9 @@ function googleSearch(pregunta, respuestasArray, socketID){
         if(googleHeaderRoot.text().trim() != ""){
             let cabeza = $(googleHeaderRoot).find(".kp-header")
             $(cabeza).find(".LEsW6e").remove()
+            $(cabeza).find(".kno-fb-ctx").remove()
+            $(cabeza).find(".rhsl4").remove()
+            $(cabeza).find("svg").remove()
             let cuerpo = $(googleHeaderRoot).find(".SALvLe")
             $(cuerpo).find(".LEsW6e").remove()
 
@@ -196,7 +193,6 @@ function bingSearch(pregunta, respuestasArray, socketID){
     }).then($ => {
         let resultados2 = $("#b_results > li.b_algo")
 
-        let countA2 = 0, countB2 = 0, countC2 = 0;
         for (let j = 0; j < resultados2.length; j++) {
             let title2 = $(resultados2[j]).find("h2 > a").text();
             let link2 = $(resultados2[j]).find("h2 > a").attr("href");
@@ -261,16 +257,9 @@ function bingSearch(pregunta, respuestasArray, socketID){
 
 function emitSockets(nombre, data, socketID){
     if(socketID){
-        coneccionesSocket.forEach(socket => {
-            if(socket.id == socketID){
-                socket.emit(nombre, data)
-                return
-            }
-        })
+        io.sockets.connected[socketID].emit(nombre, data)
     }else{
-        coneccionesSocket.forEach(socket => {
-            socket.emit(nombre, data)
-        })
+        io.emit(nombre, data)
     }
 }
 
@@ -297,4 +286,4 @@ app.get("/", (req, res) => {
 var port = process.env.PORT || 80
 http.listen(port, function() {
     console.log("To view your app, open this link in your browser: http://localhost:" + port);
-});
+})

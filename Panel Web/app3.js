@@ -4,6 +4,7 @@ const http = require('http').createServer(app)
 const io = require("socket.io").listen(http)
 const fs = require("fs")
 const path = require("path")
+const sharp = require("sharp")
 
 //Dengurs - Autorizar sitios https con certificado caduco o auto firmado
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  
@@ -48,20 +49,30 @@ app.post("/", (req, res, next) => {
         //Guardar imagen async
         fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
 
-        let OCR = client.textDetection( {image: { content: bufferImage }} )
-        
-        OCR.then(data => {
-            let textoArray = data[0].fullTextAnnotation.text
-                .split("\n")
-                .filter(item => item.trim() != "" ) //Remueve elementos vacios
+        let pregunta = sharp(bufferImage).resize(480, 120, {position : "top"}).toBuffer()
+        let respuestas = sharp(bufferImage).resize(480, 245, {position : "bottom"}).toBuffer()
 
-            let pregunta = textoArray.splice(0, textoArray.length-3).join(" ")  //Remueve del array la pregunta
+        Promise.all([pregunta, respuestas]).then(bufferImagenes => {
+            let OCRPregunta  = client.textDetection( {image: { content: bufferImagenes[0] }} )
+            let OCRRespuesta = client.textDetection( {image: { content: bufferImagenes[1] }} )
+        
+            return Promise.all([OCRPregunta, OCRRespuesta])
+        }).then(data => {
+            let pregunta = data[0][0].fullTextAnnotation.text
+                .replace("\n", " ").replace(/\r?\n|\r/g, " ")    //Replace all white spaces and new lines
+            let respuestas = data[1][0].fullTextAnnotation.text
+                .split("\n").filter(word => word.length > 0);   //replace empty words
+
             //Remover el numero de inicio en algunas preguntas de Q12
             if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
             //Se eliminan articulos, signos etc de la pregunta
-            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, "")
 
-            respuestasArray = textoArray    //El array restante se toma como las respuestas [A, B, C]
+            respuestasArray = respuestas  
+            console.log(pregunta)
+            console.log(respuestas);
+            
             return pregunta
         }).then((pregunta)=> {
             ///// Google Search

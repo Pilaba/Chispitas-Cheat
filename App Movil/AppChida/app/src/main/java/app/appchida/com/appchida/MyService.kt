@@ -137,7 +137,7 @@ class MyService : Service(), ImageReader.OnImageAvailableListener {
             bitmap.copyPixelsFromBuffer(buffer)
 
             //Crop Bitmap
-            bitmap = Bitmap.createBitmap(bitmap, 0, 650, bitmap.width,bitmap.height-650)
+            bitmap = Bitmap.createBitmap(bitmap, 0, 610, bitmap.width,bitmap.height-610)
 
             //Send image to server
             val byteArr = ByteArrayOutputStream()

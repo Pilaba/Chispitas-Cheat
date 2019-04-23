@@ -49,8 +49,8 @@ app.post("/", (req, res, next) => {
         //Guardar imagen async
         fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
 
-        let pregunta = sharp(bufferImage).resize(480, 120, {position : "top"}).toBuffer()
-        let respuestas = sharp(bufferImage).resize(480, 245, {position : "bottom"}).toBuffer()
+        let pregunta = sharp(bufferImage).resize(480, 130, {position : "top"}).toBuffer()
+        let respuestas = sharp(bufferImage).resize(480, 255, {position : "bottom"}).toBuffer()
 
         Promise.all([pregunta, respuestas]).then(bufferImagenes => {
             let OCRPregunta  = client.textDetection( {image: { content: bufferImagenes[0] }} )

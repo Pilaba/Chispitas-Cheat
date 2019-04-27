@@ -153,9 +153,11 @@
                 </div>
                 <div class="col-md-12" v-html="googleHeaderHTML"> </div>
             </div>
-
             
             <div class="col-md-6">
+                <div class="col-md-12" style="background-color: white" v-html="googleTextoHeaderHTML">
+                 </div>
+
                 <div class="col-md-9" style="padding: 20px">
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
                     <input v-model="REquestion" v-on:keyup.enter="submit" type="text" class="col-md-12 form-control">
@@ -204,6 +206,7 @@
                             [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ],
                 graficaData: [20, 8, 3],
                 googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>',
+                googleTextoHeaderHTML : '<p>...</p>',
                 linksParseados: 0
             },
             created: function () {
@@ -213,6 +216,7 @@
                 this.socket.on('Grafica', this.onGrafica)
                 this.socket.on('EachWordSeach', this.onEachWordSeach)
                 this.socket.on('googleHeader', this.onGoogleHeader)
+                this.socket.on('textoHeader', this.onTextoHeader)
             },
             methods: {
                 onTime: function(timeMillis){
@@ -224,6 +228,8 @@
                     this.eachWord = [[{}], [{}], [{}]]
                     this.eachWord = ""
                     this.linksParseados = 0
+                    this.googleHeaderHTML = ""
+                    this.googleTextoHeaderHTML = ""
 
                     this.pregunta = data.pregunta
                     this.respuestas = data.respuestas
@@ -240,6 +246,9 @@
                 },
                 onGoogleHeader: function(data) {
                     this.googleHeaderHTML = data.htmlHeader
+                },
+                onTextoHeader: function(data) {
+                    this.googleTextoHeaderHTML = data.htmlTextoHeader
                 },
                 onEachWordSeach: function(data){
                     this.eachWord = data.matriz

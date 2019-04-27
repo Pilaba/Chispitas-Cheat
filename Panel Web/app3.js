@@ -189,6 +189,10 @@ function googleSearch(pregunta, respuestasArray, socketID){
             let container = $(googleHeaderRoot).find(".rl_container") 
 
             emitSockets("googleHeader", { htmlHeader: cabeza.html() + container.html() + cuerpo.html() })
+
+            //Experimental
+            let headerTexto = $(googleHeaderRoot).find(".LGOjhe")
+            emitSockets("textoHeader", { htmlTextoHeader: headerTexto.html() })
         }
     })
 }

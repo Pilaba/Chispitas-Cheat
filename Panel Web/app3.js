@@ -42,12 +42,42 @@ app.use(require("serve-favicon")(__dirname + '/favicon.ico'))
 
 app.post("/", (req, res, next) => {
     //INIT TIME
-    var inicio = new Date();
+    let inicio = new Date();
+    let screenshotType = 0     //0 = NORMAL, 1 = VISION, 2 = ONLY RESPONSES
 
     req.busboy.on('field', (fieldname, data, filename, encoding, mimetype) => {
+        if(fieldname == "TYPESCREENSHOT"){
+            screenshotType = data
+            return;
+        }
+        
         let bufferImage = Buffer.from(data, 'base64')
         //Guardar imagen async
         fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
+
+        if(screenshotType == 1){
+            client.webDetection( {image: { content: bufferImage }} ).then(result => {
+                webDetection = result[0].webDetection
+                
+                //Web search
+                if (webDetection.webEntities.length || webDetection.bestGuessLabels.length) {
+                    emitSockets("visionImage", {
+                        label: webDetection.bestGuessLabels[0].label, 
+                        entities : webDetection.webEntities.map(item => item.description)
+                    })
+                }
+            }).catch(console.log)
+            return
+        }else if(screenshotType == 2){
+            client.textDetection( {image: { content: bufferImage }} ).then(data => {
+                let respuestas = data[0].fullTextAnnotation.text
+                    .split("\n").filter(word => word.length > 0);   //replace empty words
+                respuestasArray = respuestas
+
+                emitSockets("respuestasOnly", {respuestas : respuestasArray})
+            }).catch(console.log)
+            return
+        }
 
         let pregunta = sharp(bufferImage).resize(480, 130, {position : "top"}).toBuffer()
         let respuestas = sharp(bufferImage).resize(480, 255, {position : "bottom"}).toBuffer()

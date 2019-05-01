@@ -156,7 +156,16 @@
             
             <div class="col-md-6">
                 <div class="col-md-12" style="background-color: white" v-html="googleTextoHeaderHTML">
-                 </div>
+
+                </div>
+
+                <div class="col-md-12">
+                    <a class="chip" v-for="chip in entities" v-bind:href="'https://www.google.com/search?q=' + chip" target="_blank"
+                    style="display: inline-block; border-radius: 25px; background-color: white;
+                    cursor: pointer; padding: 10px; margin: 5px; font-size: 22px; color: blue"> 
+                        {{ chip }}
+                    </a>
+                </div>
 
                 <div class="col-md-9" style="padding: 20px">
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
@@ -207,7 +216,8 @@
                 graficaData: [20, 8, 3],
                 googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>',
                 googleTextoHeaderHTML : '<p>...</p>',
-                linksParseados: 0
+                linksParseados: 0,
+                entities: [], entityLabel: "coño peludo"
             },
             created: function () {
                 this.socket = io.connect();
@@ -217,6 +227,8 @@
                 this.socket.on('EachWordSeach', this.onEachWordSeach)
                 this.socket.on('googleHeader', this.onGoogleHeader)
                 this.socket.on('textoHeader', this.onTextoHeader)
+                this.socket.on('respuestasOnly', this.onRespuestasOnly)
+                this.socket.on('visionImage', this.onVisionImage)
             },
             methods: {
                 onTime: function(timeMillis){
@@ -230,6 +242,8 @@
                     this.linksParseados = 0
                     this.googleHeaderHTML = ""
                     this.googleTextoHeaderHTML = ""
+                    this.entities = []
+                    this.entityLabel = ""
 
                     this.pregunta = data.pregunta
                     this.respuestas = data.respuestas
@@ -262,6 +276,13 @@
                 },
                 submitPrueba: function(data){
                     this.socket.emit("Pruebas", {q: this.pregunta, respuestas: this.respuestas, id: this.socket.id })
+                },
+                onRespuestasOnly: function (data) {
+                    this.respuestas = data.respuestas
+                },
+                onVisionImage: function (data) {
+                    this.entities = data.entities
+                    this.entityLabel = data.label
                 }
             },
             computed: {

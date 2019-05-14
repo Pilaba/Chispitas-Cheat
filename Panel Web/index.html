@@ -74,7 +74,7 @@
     <br>
     <div class="container" id="app">
       <!-- Static navbar -->
-      <nav class="navbar navbar-default">
+      <nav class="navbar navbar-default" id="navBar">
         <div class="container-fluid">
           <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -99,10 +99,17 @@
                    <li><a href="#"><i class="fa fa-question-circle" aria-hidden="true"></i>&nbsp;Documentación</a></li>
                 </ul>
               </li>
-              <li><a href="#" data-toggle="collapse" data-target="#pruebaForm"><i class="fa fa-paste" aria-hidden="true" ></i>&nbsp;Pruebas</a></li>
-              <li><a href="#"><i class="fa fa-clock-o text-success" aria-hidden="true"></i>&nbsp;{{ TIME }} s</a></li>
-              <li><a href="#"><i class="fa fa-line-chart text-success" aria-hidden="true">
+              <li><a class="btn" data-toggle="collapse" data-target="#pruebaForm"><i class="fa fa-paste" aria-hidden="true" ></i>&nbsp;Pruebas</a></li>
+              <li><a ><i class="fa fa-clock-o text-success" aria-hidden="true"></i>&nbsp;{{ TIME }} s</a></li>
+              <li><a ><i class="fa fa-line-chart text-success" aria-hidden="true">
                   </i>&nbsp;{{ linksParseados }}</a>
+              </li>
+              <li>
+                  <a class="btn fa fa-window-close" 
+                    onClick="
+                        document.getElementById('navBar').style.display = 'none'
+                        "> Close navbar
+                  </a>
               </li>
             </ul>
           </div><!--/.nav-collapse -->

@@ -134,7 +134,7 @@ function googleSearch(pregunta, respuestasArray, socketID){
         headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
         qs: {
             q : pregunta,
-            count : 12
+            count : 15
         }, transform: function (body) { return cheerio.load(body); } 
     }).then($ => {
         let resultados = $("div.g")
@@ -237,7 +237,7 @@ function bingSearch(pregunta, respuestasArray, socketID){
         }, transform: function (body) { return cheerio.load(body); } 
     }).then($ => {
         let resultados2 = $("#b_results > li.b_algo")
-
+        
         for (let j = 0; j < resultados2.length; j++) {
             let title2 = $(resultados2[j]).find("h2 > a").text();
             let link2 = $(resultados2[j]).find("h2 > a").attr("href");
@@ -269,7 +269,6 @@ function bingSearch(pregunta, respuestasArray, socketID){
                         array: [encontradosA2, encontradosB2, encontradosC2]
                     }, socketID)
                 }
-
                 //SEARCH FOR EVERY WORD 
                 /* 
                 let arrayClon2 = [...respuestasArray]  //Clon para prevenir que se modifiquen los valores dentro del array
@@ -292,7 +291,7 @@ function bingSearch(pregunta, respuestasArray, socketID){
                     });
                 });
                 emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)*/
-
+                
             }).catch(err => {
                 console.log("error parsing bing link ", link2, " ", "at index", " ", j)
             })

@@ -4,7 +4,7 @@
     <title>ON TOY</title>
     <meta charset="utf-8" /> 
     <meta http-equiv="X-UA-Compatible" content="IE=edge" lang="es">
-    <meta name="description" content="App para hacer un dinero bien chingon en confetti y Q12 " />
+    <meta name="description" content="App con fines educativos" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="keywords" content="chispitas,confetti,da dinero, ratero"/>
     <meta name="author" content="Pilaba"/>
@@ -19,13 +19,12 @@
     <base href="" />
 
     <!-- Google charts, boostrap 3, JQuery, SocketIO -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
@@ -71,7 +70,6 @@
 
 </head>
 <body>  
-    <br>
     <div class="container" id="app">
       <!-- Static navbar -->
       <nav class="navbar navbar-default" id="navBar">
@@ -83,7 +81,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href=""><img src="https://i.ibb.co/8MHFC4t/chispitas-logo.png" width="150" class="img-responsive"></a>
+            <a class="navbar-brand" href=""><img src="https://i.ibb.co/8MHFC4t/chispitas-logo.png" width="180" class="img-responsive"></a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
@@ -107,8 +105,7 @@
               <li>
                   <a class="btn fa fa-window-close" 
                     onClick="
-                        document.getElementById('navBar').style.display = 'none'
-                        "> Close navbar
+                        document.getElementById('navBar').style.display = 'none'"> Close navbar
                   </a>
               </li>
             </ul>
@@ -116,6 +113,7 @@
         </div><!--/.container-fluid -->
       </nav>
 
+        <!-- FORMULARIO DE PRUEBAS -->
         <div class="row collapse" id="pruebaForm">
             <div class="col-md-12">
                 <input type="text" v-model="pregunta" style='width:30em'>
@@ -125,10 +123,12 @@
                 <button type="submit" v-on:click="submitPrueba"  class="btn btn-primary"> GO! </button>
             </div>
         </div>
-
-        <div class="row" >
+        
+        <div class="row">
             <div class="col-md-6">
-                <h2 class="btn btn-default btn-flat" style="width: 100%; font-size: large; white-space:normal !important; word-wrap: break-word;">
+                <h2 class="btn" style="width: 100%; font-size: large; white-space:normal !important; 
+                    word-wrap: break-word; text-align: center; border: 2px thin; border-color: rgb(0, 57, 114);
+                    color: rgb(0, 57, 114); font-family: Verdana">
                     {{ pregunta }}
                 </h2>
                 <div id="Grafica" class="col-md-12" style="height: 280px;"></div>
@@ -161,9 +161,9 @@
                 <div class="col-md-12" v-html="googleHeaderHTML"> </div>
             </div>
             
-            <div class="col-md-6">
-                <div class="col-md-12" style="background-color: white" v-html="googleTextoHeaderHTML">
-
+            <div class="col-md-6" id="searchContent">
+                <div class="col-md-12" style="background-color: white" 
+                    v-html="googleTextoHeaderHTML">
                 </div>
 
                 <div class="col-md-12">
@@ -178,6 +178,7 @@
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
                     <input v-model="REquestion" v-on:keyup.enter="submit" type="text" class="col-md-12 form-control">
                 </div>
+
                 <div class="col-md-3" style="padding: 20px"> <br>
                     <button v-on:click="submit" type="button" class="col-md-12 form-control btn-success">
                         <i class="fa fa-search" aria-hidden="true"></i> GO!
@@ -195,7 +196,7 @@
                       s.parentNode.insertBefore(gcse, s);
                     })();
                 </script>
-                <gcse:searchresults-only gname="search" webSearchResultSetSize="3"></gcse:searchresults-only>
+                <gcse:searchresults-only gname="search" webSearchResultSetSize="5"></gcse:searchresults-only>
             </div>
         </div>
 
@@ -205,26 +206,28 @@
 <footer class="footer">
     <div class="container">
         <hr>
-        <p>Company, Inc. &copy; 2019 &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a> <span class="pull-right"><i class="fa fa-terminal" aria-hidden="true"></i>&nbsp;<a href="https://bleutecmedia.com/member/i-f-baldemar-alejandres-garcia/" target="_blank">Author</a> | <a href="https://bleutecmedia.com/member/rigoberto-alejandres-garcia/" target="_blank">Colaborador</a></span></p>
+        <p>Pilaba apps, Inc. &copy; 2019 &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a> <span class="pull-right"><i class="fa fa-terminal" aria-hidden="true"></i>&nbsp;<a href="https://bleutecmedia.com/member/i-f-baldemar-alejandres-garcia/" target="_blank">Author</a> | <a href="https://bleutecmedia.com/member/rigoberto-alejandres-garcia/" target="_blank">Colaborador</a></span></p>
     </div>
 
     <script>
         //Vuejs initializacion
         var app = new Vue({
             el: '#app',
-            data: {
-                TIME: 1.52, socket :{}, pregunta: "¿Cual de estos manes NO es futbolista?", 
-                respuestas: ['Messi', 'Hulk', 'Fernando Alonso'],  REquestion: '',
-                itemsBusqueda: [
-                    {link: "https://taringa.net", htmlTitle: "Messi el hormonado", p: {A:90, B:5, C:5}}
-                ], 
-                eachWord: [ [{word: "Messi", count : "20"}], [{word: "Hulk", count : "8"}], 
-                            [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ],
-                graficaData: [20, 8, 3],
-                googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>',
-                googleTextoHeaderHTML : '<p>...</p>',
-                linksParseados: 0,
-                entities: [], entityLabel: "coño peludo"
+            data: function() {
+                return {
+                    TIME: 1.52, socket :{}, pregunta: "¿Cual de estos manes NO es futbolista?", 
+                    respuestas: ['Messi', 'Hulk', 'Fernando Alonso'],  REquestion: '',
+                    itemsBusqueda: [
+                        {link: "https://taringa.net", htmlTitle: "Messi el hormonado", p: {A:90, B:5, C:5}}
+                    ], 
+                    eachWord: [ [{word: "Messi", count : "20"}], [{word: "Hulk", count : "8"}], 
+                                [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ],
+                    graficaData: [20, 8, 3],
+                    googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>',
+                    googleTextoHeaderHTML : '<p>...</p>',
+                    linksParseados: 0,
+                    entities: [], entityLabel: "coño peludo"
+                }
             },
             created: function () {
                 this.socket = io.connect();
@@ -290,28 +293,38 @@
                 onVisionImage: function (data) {
                     this.entities = data.entities
                     this.entityLabel = data.label
+                },
+                searchCoincidences: function () {
+                    //console.log($("#searchContent").text());
                 }
             },
             computed: {
                 resaltarTablaIndex: function(){
-                    let sumas = []
-                    this.eachWord.forEach((arrr, index) =>  {
-                        let count = 1
-                        arrr.forEach(el => count *= parseInt(el.count))
+                    let data = []
+                    this.eachWord.forEach((item, index) =>  {
+                        //get the min element
+                        let arrr = []
+                        item.forEach(el => { arrr.push(parseInt(el.count)) });
 
-                        sumas[index] = (count / arrr.length)
+                        var minimoIndice = arrr.indexOf(Math.min(...arrr))
+                        if(arrr[minimoIndice] == 0){    //Hay un 0 en los elementos -> sumarlos
+                            let suma = 0
+                            arrr.forEach(el => suma += parseInt(el.count))
+
+                            data[index] = (suma / arrr.length)
+                        }else {                         //Hay alemos un elemento mayor a 0 -> multiplicarlos y sumarlos
+                            let suma = Math.pow(arrr[minimoIndice], arrr.length) 
+                            
+                            arrr.forEach((element, i) => {
+                                if(i != minimoIndice) {
+                                    suma += (element - arrr[minimoIndice])
+                                }
+                            });
+
+                            data[index] =  (suma / arrr.length)
+                        }
                     })
-
-                    if(Math.max(...sumas) == 0){
-                        this.eachWord.forEach((arrr, index) =>  {
-                            let count = 0
-                            arrr.forEach(el => count += parseInt(el.count))
-
-                            sumas[index] = (count / arrr.length)
-                        })
-                    }
-
-                    return sumas.indexOf(Math.max(...sumas))
+                    return data.indexOf(Math.max(...data))
                 }
             }
         });

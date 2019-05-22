@@ -19,12 +19,13 @@ Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero
  - [x]  Mejorar busquedas en Google
  - [x] Opción para typear la pregunta
  - [x] Mejorar la vista de opciones googleadas y el desplegado de resultados
- - [x] ~~Agregar API Search de Wikipedia~~ Ni de coña, google es mente superior. El API search de Mediawiki es una poronga.
  - [ ] Crear Backend en CodeIgniter para almacenar datos y mostrar estadísticas
  - [ ] Evaluar implementar Machine Learning
 
 ## TECNOLOGÍAS USADAS
-*Todas las tecnologías usadas serán listados en esta sección posteriormente.*
+* [Nodejs](https://nodejs.org/es/) 
+* [Kotlin](https://kotlinlang.org/)
+* [GCP](https://cloud.google.com/?hl=es-419)
 
 ## REQUERIMIENTOS DEL CLIENTE Y SERVIDOR
 *Todos los demás requerimientos serán listados en esta sección posteriormente.*
@@ -37,7 +38,14 @@ Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero
  - npm restart -> para reiniciar
  - visitar http://127.0.0.1
  - Instalar App de la carpeta "App Movil"
- - Instalar App ["Captura de pantalla"](https://play.google.com/store/apps/details?id=com.icecoldapps.screenshoteasy)
 
 ## ENLACES, REFERENCIAS Y APIS
-*Agregadas a esta sección posteriormente.*
+* [AndroidAsync](https://github.com/koush/AndroidAsync)
+* [Vuejs](https://vuejs.org/)
+* [Express Framework](https://expressjs.com/es/)
+* [PM2](https://github.com/Unitech/pm2)
+* [Google Cloud OCR](https://github.com/googleapis/nodejs-vision)
+* [Socket IO](https://socket.io/)
+* [Sharp](https://github.com/lovell/sharp)
+* [cheerio](https://github.com/cheeriojs/cheerio)
+* [busboy](https://github.com/mscdex/busboy)

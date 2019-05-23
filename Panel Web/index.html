@@ -121,7 +121,7 @@
             <div class="col-md-12">
                 <v-container>
                     <v-layout row wrap>
-                        <v-flex xs5>
+                        <v-flex md5>
                             <v-text-field color="indigo" label="Pregunta" v-model="pregunta"></v-text-field> 
                         </v-flex>
                         <v-text-field color="indigo" label="Opcion 1" v-model="respuestas[0]"></v-text-field> 
@@ -134,12 +134,15 @@
         </div>
         
         <div class="row">
-            <div class="col-md-6">
-                <v-card>
-                    <v-progress-linear color="indigo" height="4" v-bind:value="linksParseados * 10"></v-progress-linear>
-                    <v-btn outline large block  color="indigo" > {{ pregunta }} </v-btn>
-                    <div id="Grafica" class="col-md-12" style="height: 280px;"></div>
-                </v-card>
+            <div class="col-md-6">         
+                <v-progress-linear color="indigo" height="4" v-bind:value="linksParseados * 8"></v-progress-linear>
+                <h2 class="btn" style="width: 100%; font-size: large; white-space:normal !important; 
+                    word-wrap: break-word; text-align: center; border: 2px thin; border-color: rgb(0, 57, 114);
+                    color: rgb(0, 57, 114); font-family: Verdana">
+                    {{ pregunta }}
+                </h2>
+                
+                <div id="Grafica" class="col-md-12" style="height: 280px;"></div>
                 <div class="col-md-12">
                     <table class="table">
                         <thead>
@@ -331,7 +334,7 @@
                             data[index] =  (suma / arrr.length)
                         }
                     })
-                    data = data.filter(el => el == el)      //Number.isNan(el)  OR isNaN(el)
+                    data = data.map(el => isNaN(el) ? 0 : el)
                     return data.indexOf(Math.max(...data))
                 }
             }

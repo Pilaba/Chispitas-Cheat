@@ -1,45 +1,135 @@
-/*let GET = require("request-promise")
-let ocrSpaceApi = require("ocr-space-api")
-let fs = require("fs")
-let util = require("util")
+const GET   = require('request-promise')
+const fs    = require('fs')
+const util  = require('util')
+const AWS   = require('aws-sdk');   
+const sharp = require('sharp')                           
+AWS.config.update({
+    accessKeyId: 'AKIAUP37E4CK7ZUXFXQQ',
+    secretAccessKey: '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',
+    region: 'us-east-1'
+});
 
-let res = "¿Cuál de estos NO es un órgano del \r\naparato digestivo? \r\nHígado \r\nPáncreas \r\nAlvéolos \r\n"
+let recognition = new AWS.Rekognition()
+let strBase64   = fs.readFileSync("./imagenes/1559605695886.jpg", {encoding: 'base64'});
 
-var arr = res.split("\n").filter(item => item.length != 0)
-console.log(arr);
+async function testFREEOCR() {
+    let inicio = new Date()
+    let Base64Image = util.format('data:%s;base64,%s', "image/png", strBase64);
+    let options     = { 
+        apikey: '795198753588957',
+        language: 'spa', 
+        isOverlayRequired: false,
+        base64image: Base64Image
+    };
 
-
-let strBase64 = fs.readFileSync("./imagenes/1559605695886.jpg", {encoding: 'base64'});
-let Base64Image = util.format('data:%s;base64,%s', "image/png", strBase64);
-
-var options =  { 
-    apikey: '795198753588957',
-    language: 'spa', 
-    isOverlayRequired: false,
-    base64image: Base64Image
-};
-
-let inicio = new Date();
-// Run and wait the result
-
-GET.post({
-    url: "https://api.ocr.space/parse/image",
-    form: options,
-    headers : {"content-type": "application/json"},
-    json: true
-}).then(res => {
-    console.log(res);
-}).catch(console.log)
-*/
-/*
-ocrSpaceApi.parseImageFromLocalFile("./imagenes/1559605695886.jpg", options)
-  .then(function (parsedResult) {
-    console.log('parsedText: \n', parsedResult.parsedText);
-    console.log('ocrParsedResult: \n', parsedResult.ocrParsedResult);
+    let response = await GET.post({
+        url: "https://api.ocr.space/parse/image",
+        form: options,
+        headers : {"content-type": "application/json"},
+        json: true
+    })
 
     //TIMES UP
-    let time = ( new Date() - inicio ) / 1000
-    console.log("TIME TO PROCESS ", time);
-  }).catch(function (err) {
-    console.log('ERROR:', err);
-  });*/
+    return ( new Date() - inicio ) / 1000
+}
+
+async function testFREEOCRSHARP() {
+    let inicio = new Date()
+
+    let bufferImage = Buffer.from(strBase64, 'base64')
+
+    let buffImages = await Promise.all([
+        sharp(bufferImage).resize(480, 130, {position : "top"}).toBuffer(), 
+        sharp(bufferImage).resize(480, 255, {position : "bottom"}).toBuffer()])
+
+    let Base64ImageA = util.format('data:%s;base64,%s', "image/png", buffImages[0].toString("base64"));
+    let Base64ImageB = util.format('data:%s;base64,%s', "image/png", buffImages[1].toString("base64"));
+
+    let optionsA     = { 
+        apikey: '795198753588957',
+        language: 'spa', 
+        isOverlayRequired: false,
+        base64image: Base64ImageA
+    };
+
+    let optionsB     = { 
+        apikey: '795198753588957',
+        language: 'spa', 
+        isOverlayRequired: false,
+        base64image: Base64ImageB
+    };
+
+    let data = await Promise.all([ 
+        GET.post({
+            url: "https://api.ocr.space/parse/image",
+            form: optionsA,
+            headers : {"content-type": "application/json"},
+            json: true
+        }), 
+        GET.post({ url: "https://api.ocr.space/parse/image",
+            form: optionsB,
+            headers : {"content-type": "application/json"},
+            json: true
+        })
+    ])
+
+    //TIMES UP
+    return ( new Date() - inicio ) / 1000
+}
+
+async function testAmazonRekognition() {
+    let inicio = new Date()
+    let data = await recognition.detectText({Image: { Bytes: Buffer.from(strBase64, 'base64') }}).promise()
+    return ( new Date() - inicio ) / 1000
+}
+
+async function testAmazonRekognitionSHARP() {
+    let inicio = new Date()
+    
+    let bufferImage = Buffer.from(strBase64, 'base64')
+
+    let buffImages = await Promise.all([
+        sharp(bufferImage).resize(480, 130, {position : "top"}).toBuffer(), 
+        sharp(bufferImage).resize(480, 255, {position : "bottom"}).toBuffer()])
+
+    let data = await Promise.all([
+        recognition.detectText({Image: { Bytes: buffImages[0] }}).promise(),
+        recognition.detectText({Image: { Bytes: buffImages[1] }}).promise()
+    ])
+
+    return ( new Date() - inicio ) / 1000
+}
+
+
+async function startTest(number) {
+    // FREE OCR API TEST, WITH AND WITHOUT SHARP
+    // WINNER 
+    let TIME = []
+    for (let index = 0; index < number; index++) {
+        TIME.push(await testFREEOCR())
+    }
+    console.log(TIME);
+
+    TIME = []
+    for (let index = 0; index < number; index++) {
+        TIME.push(await testFREEOCRSHARP())
+    }
+    console.log(TIME);
+
+    
+    // AMAZON REKONITION TEST, WITH AND WITHOUT SHARP
+    // WINNER 
+    TIME = []
+    for (let index = 0; index < number; index++) {
+        TIME.push(await testAmazonRekognition())
+    }
+    console.log(TIME);
+
+    TIME = []
+    for (let index = 0; index < number; index++) {
+        TIME.push(await testAmazonRekognitionSHARP())
+    }
+    console.log(TIME);
+}
+
+startTest(5)

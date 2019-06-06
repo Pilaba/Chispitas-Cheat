@@ -1,10 +1,10 @@
 //Web setup
-const app = require("express")()
+const express = require('express');
+const app = express();   
 const http = require('http').createServer(app)
 const io = require("socket.io").listen(http)
 const fs = require("fs")
 const path = require("path")
-const sharp = require("sharp")
 
 //Dengurs - Autorizar sitios https con certificado caduco o auto firmado
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  
@@ -29,7 +29,6 @@ io.on('connection', function (socket) {
 })
 
 //3rd party Libraries setup
-const busboy = require('connect-busboy');
 const GET = require('request-promise');                          // api rest client
 const cheerio = require('cheerio');                              // Basically jQuery for node.js
 const AWS  = require('aws-sdk');                                 // aws rekognition api
@@ -39,69 +38,53 @@ AWS.config.update({
     region: 'us-east-1'
 });
 let recognition = new AWS.Rekognition()
-app.use(busboy({ immediate: true }))
 app.use(require("serve-favicon")(__dirname + '/favicon.ico'))
+app.use(express.json({limit: '10mb'}));    //para parsear json automaticamente
+app.use(express.urlencoded({limit: '10mb', extended: false }));   //procesar forms
 
-app.post("/", (req, res, next) => {
+const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
+app.post("/", asyncHandler(async (req, res, next) => {
     //INIT TIME
     let inicio = new Date();
-    let screenshotType = 0     //0 = NORMAL, 1 = VISION, 2 = ONLY RESPONSES
 
-    req.busboy.on('field', (fieldname, data, filename, encoding, mimetype) => {
-        if(fieldname == "TYPESCREENSHOT"){
-            screenshotType = data
-            return;
-        }
-        
-        let bufferImage = Buffer.from(data, 'base64')
-        //Guardar imagen async
-        fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
+    let bufferImage = Buffer.from(req.body.imgasB64, 'base64')
+    fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
 
-        if(screenshotType == 1){
-            return
-        }else if(screenshotType == 2){
-            return
-        }
+    let data       = await recognition.detectText({Image: { Bytes: bufferImage }}).promise()
+    let pregunta   = ""
+    let respuestas = ['', '', '']
 
-        recognition.detectText({Image: { Bytes: bufferImage }}).promise().then(data => {
-            let pregunta   = ""
-            let respuestas = ['', '', '']
-        
-            let array      = data.TextDetections;
-            let lastID     = array[array.length-1].ParentId
-            
-            for(var i = 0, len = array.length ; i < len ; i++) {
-                if(array[i].Type == "WORD"){
-                    switch (array[i].ParentId) {
-                        case lastID:   respuestas[2] += array[i].DetectedText + " ";  break;
-                        case lastID-1: respuestas[1] += array[i].DetectedText + " ";  break;
-                        case lastID-2: respuestas[0] += array[i].DetectedText + " ";  break;
-                        default:       pregunta      += array[i].DetectedText + " ";         
-                    }
-                }
+    let array      = data.TextDetections;
+    let lastID     = array[array.length-1].ParentId
+    for(var i = 0, len = array.length ; i < len ; i++) {
+        if(array[i].Type == "WORD"){
+            switch (array[i].ParentId) {
+                case lastID:   respuestas[2] += array[i].DetectedText + " ";  break;
+                case lastID-1: respuestas[1] += array[i].DetectedText + " ";  break;
+                case lastID-2: respuestas[0] += array[i].DetectedText + " ";  break;
+                default:       pregunta      += array[i].DetectedText + " ";         
             }
-            pregunta = pregunta.replace("\n", " ").replace(/\r?\n|\r/g, " ")    //Replace all white spaces and new lines
-            if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  } //Remover el numero de inicio en algunas preguntas de Q12
-            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "") //Se eliminan articulos, signos etc de la pregunta
-            
-            respuestasArray = respuestas.map(resp => resp.trim())
-            console.log(pregunta, respuestasArray);
-            
-             ///// Google Search
-             googleSearch(pregunta, respuestasArray)
-             ///// Bing search
-             bingSearch(pregunta, respuestasArray)
- 
-             //TIMES UP
-             let time = ( new Date() - inicio ) / 1000
-             console.log("TIME TO PROCESS ", time);
-             emitSockets('T', time)
-        }).catch(console.log)
+        }
+    }
+    pregunta = pregunta.replace("\n", " ").replace(/\r?\n|\r/g, " ")    //Replace all white spaces and new lines
+    if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  } //Remover el numero de inicio en algunas preguntas de Q12
+    pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "") //Se eliminan articulos, signos etc de la pregunta
+    
+    respuestasArray = respuestas.map(resp => resp.trim())
+    console.log(pregunta, respuestasArray);
+    
+    ///// Google Search
+    googleSearch(pregunta, respuestasArray)
+    ///// Bing search
+    bingSearch(pregunta, respuestasArray)
 
-        //Terminar la conexion
-        res.end();
-    })
-})
+    //TIMES UP
+    let time = ( new Date() - inicio ) / 1000
+    console.log("TIME TO PROCESS ", time);
+    emitSockets('T', time)
+    
+    res.end();
+}))
 
 function googleSearch(pregunta, respuestasArray, socketID){
     //Resetear cotador de incidencias para cada palabra

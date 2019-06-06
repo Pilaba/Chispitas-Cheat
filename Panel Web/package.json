@@ -25,7 +25,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "pm2 start FreeOCRapp.js --node-args='--max_old_space_size=2560'",
+    "start": "pm2 start awsApp.js --node-args='--max_old_space_size=2560'",
     "stop": "pm2 stop all",
     "restart": "pm2 restart all"
   },

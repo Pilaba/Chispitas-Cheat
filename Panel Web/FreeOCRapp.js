@@ -1,5 +1,6 @@
 //Web setup
-const app   = require("express")()
+const express = require('express');
+const app = express();   
 const http  = require('http').createServer(app)
 const io    = require("socket.io").listen(http)
 const fs    = require("fs")
@@ -40,67 +41,55 @@ const client = new vision.ImageAnnotatorClient({
 })
 app.use(busboy({ immediate: true }))
 app.use(require("serve-favicon")(__dirname + '/favicon.ico'))
+app.use(express.json({limit: '10mb'}));    //para parsear json automaticamente
+app.use(express.urlencoded({limit: '10mb', extended: false }));   //procesar forms
 
 app.post("/", (req, res, next) => {
     //INIT TIME
     let inicio = new Date();
     let screenshotType = 0     //0 = NORMAL, 1 = VISION, 2 = ONLY RESPONSES
 
-    req.busboy.on('field', (fieldname, data, filename, encoding, mimetype) => {
-        if(fieldname == "TYPESCREENSHOT"){
-            screenshotType = data
-            return;
-        }
+    let bufferImage = Buffer.from(req.body.imgasB64, 'base64')
+    //Guardar imagen async
+    fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
 
-        let bufferImage = Buffer.from(data, 'base64')
-        //Guardar imagen async
-        fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
+    let Base64Image = util.format('data:%s;base64,%s', "image/png", req.body.imgasB64);
+    var options =  { 
+        apikey: '795198753588957',
+        language: 'spa', 
+        base64image: Base64Image
+    };
 
-        //Later
-        if(screenshotType == 1){
-            return
-        }else if(screenshotType == 2){
-            return
-        }
+    GET.post({
+        url: "https://api.ocr.space/parse/image",
+        form: options, headers : {"content-type": "application/json"},
+        json: true,
+        timeout: 5000
+    }).then(resp => {
+        let array = resp.ParsedResults[0].ParsedText.split("\n").filter(item => item.length > 0)
+        
+        respuestasArray = array.splice(array.length-3, 3).map(el => el.replace(/\n|\r/g, "").trim())
+        let pregunta    = array.join("").replace("\n", " ").replace(/\r?\n|\r/g, " ") //Replace all white spaces and new lines
+        
+        if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  } //Remover el numero de inicio en algunas preguntas de Q12
+        pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "") //Se eliminan articulos, signos etc de la pregunta
 
-        let Base64Image = util.format('data:%s;base64,%s', "image/png", data);
-        var options =  { 
-            apikey: '795198753588957',
-            language: 'spa', 
-            base64image: Base64Image
-        };
+        console.log(pregunta, respuestasArray);
 
-        GET.post({
-            url: "https://api.ocr.space/parse/image",
-            form: options, headers : {"content-type": "application/json"},
-            json: true,
-            timeout: 5000
-        }).then(resp => {
-            let array = resp.ParsedResults[0].ParsedText.split("\n").filter(item => item.length > 0)
-            
-            respuestasArray = array.splice(array.length-3, 3).map(el => el.replace(/\n|\r/g, "").trim())
-            let pregunta    = array.join("").replace("\n", " ").replace(/\r?\n|\r/g, " ") //Replace all white spaces and new lines
-            
-            if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  } //Remover el numero de inicio en algunas preguntas de Q12
-            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "") //Se eliminan articulos, signos etc de la pregunta
+        ///// Google Search
+        googleSearch(pregunta, respuestasArray)
+        ///// Bing search
+        bingSearch(pregunta, respuestasArray)
+        
+        //TIMES UP
+        let time = ( new Date() - inicio ) / 1000
+        console.log("TIME TO PROCESS ", time);
+        emitSockets('T', time)
 
-            console.log(pregunta, respuestasArray);
+    }).catch(console.log)
 
-            ///// Google Search
-            googleSearch(pregunta, respuestasArray)
-            ///// Bing search
-            bingSearch(pregunta, respuestasArray)
-            
-            //TIMES UP
-            let time = ( new Date() - inicio ) / 1000
-            console.log("TIME TO PROCESS ", time);
-            emitSockets('T', time)
-
-        }).catch(console.log)
-
-        //Terminar la conexion
-        res.end();
-    })
+    //Terminar la conexion
+    res.end();
 })
 
 function googleSearch(pregunta, respuestasArray, socketID){

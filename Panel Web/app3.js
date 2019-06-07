@@ -1,5 +1,6 @@
 //Web setup
-const app = require("express")()
+const express = require('express');
+const app = express();   
 const http = require('http').createServer(app)
 const io = require("socket.io").listen(http)
 const fs = require("fs")
@@ -37,91 +38,61 @@ const client = new vision.ImageAnnotatorClient({
     projectId: 'cloudapi-test-230302',
     keyFilename: './GoogleVisioApiCred.json'
 })
-app.use(busboy({ immediate: true }))
 app.use(require("serve-favicon")(__dirname + '/favicon.ico'))
+app.use(express.json({limit: '10mb'}));    //para parsear json automaticamente
+app.use(express.urlencoded({limit: '10mb', extended: false }));   //procesar forms
 
 app.post("/", (req, res, next) => {
     //INIT TIME
     let inicio = new Date();
     let screenshotType = 0     //0 = NORMAL, 1 = VISION, 2 = ONLY RESPONSES
 
-    req.busboy.on('field', (fieldname, data, filename, encoding, mimetype) => {
-        if(fieldname == "TYPESCREENSHOT"){
-            screenshotType = data
-            return;
-        }
+    let bufferImage = Buffer.from(req.body.imgasB64, 'base64')
+    //Guardar imagen async
+    fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
+
+    let pregunta = sharp(bufferImage).resize(480, 130, {position : "top"}).toBuffer()
+    let respuestas = sharp(bufferImage).resize(480, 255, {position : "bottom"}).toBuffer()
+
+    Promise.all([pregunta, respuestas]).then(bufferImagenes => {
+        let OCRPregunta  = client.textDetection( {image: { content: bufferImagenes[0] }} )
+        let OCRRespuesta = client.textDetection( {image: { content: bufferImagenes[1] }} )
+    
+        return Promise.all([OCRPregunta, OCRRespuesta])
+    }).then(data => {
+        let pregunta = data[0][0].fullTextAnnotation.text
+            .replace("\n", " ").replace(/\r?\n|\r/g, " ")    //Replace all white spaces and new lines
+        let respuestas = data[1][0].fullTextAnnotation.text
+            .split("\n").filter(word => word.length > 0);   //replace empty words
+
+        //Remover el numero de inicio en algunas preguntas de Q12
+        if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
+        //Se eliminan articulos, signos etc de la pregunta
+        pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, "")
+
+        respuestasArray = respuestas  
+        console.log(pregunta)
+        console.log(respuestas);
         
-        let bufferImage = Buffer.from(data, 'base64')
-        //Guardar imagen async
-        fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
+        return pregunta
+    }).then((pregunta)=> {
+        ///// Google Search
+        googleSearch(pregunta, respuestasArray)
 
-        if(screenshotType == 1){
-            client.webDetection( {image: { content: bufferImage }} ).then(result => {
-                webDetection = result[0].webDetection
-                
-                //Web search
-                if (webDetection.webEntities.length || webDetection.bestGuessLabels.length) {
-                    emitSockets("visionImage", {
-                        label: webDetection.bestGuessLabels[0].label, 
-                        entities : webDetection.webEntities.map(item => item.description)
-                    })
-                }
-            }).catch(console.log)
-            return
-        }else if(screenshotType == 2){
-            client.textDetection( {image: { content: bufferImage }} ).then(data => {
-                let respuestas = data[0].fullTextAnnotation.text
-                    .split("\n").filter(word => word.length > 0);   //replace empty words
-                respuestasArray = respuestas
+        ///// Bing search
+        bingSearch(pregunta, respuestasArray)
 
-                emitSockets("respuestasOnly", {respuestas : respuestasArray})
-            }).catch(console.log)
-            return
-        }
-
-        let pregunta = sharp(bufferImage).resize(480, 130, {position : "top"}).toBuffer()
-        let respuestas = sharp(bufferImage).resize(480, 255, {position : "bottom"}).toBuffer()
-
-        Promise.all([pregunta, respuestas]).then(bufferImagenes => {
-            let OCRPregunta  = client.textDetection( {image: { content: bufferImagenes[0] }} )
-            let OCRRespuesta = client.textDetection( {image: { content: bufferImagenes[1] }} )
-        
-            return Promise.all([OCRPregunta, OCRRespuesta])
-        }).then(data => {
-            let pregunta = data[0][0].fullTextAnnotation.text
-                .replace("\n", " ").replace(/\r?\n|\r/g, " ")    //Replace all white spaces and new lines
-            let respuestas = data[1][0].fullTextAnnotation.text
-                .split("\n").filter(word => word.length > 0);   //replace empty words
-
-            //Remover el numero de inicio en algunas preguntas de Q12
-            if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
-            //Se eliminan articulos, signos etc de la pregunta
-            pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, "")
-
-            respuestasArray = respuestas  
-            console.log(pregunta)
-            console.log(respuestas);
-            
-            return pregunta
-        }).then((pregunta)=> {
-            ///// Google Search
-            googleSearch(pregunta, respuestasArray)
-
-            ///// Bing search
-            bingSearch(pregunta, respuestasArray)
-
-            //TIMES UP
-            let time = ( new Date() - inicio ) / 1000
-            console.log("TIME TO PROCESS ", time);
-            emitSockets('T', time)
-        }).catch(err => {
-            console.log("error file ", err)
-        })
-
-        //Terminar la conexion
-        res.end();
+        //TIMES UP
+        let time = ( new Date() - inicio ) / 1000
+        console.log("TIME TO PROCESS ", time);
+        emitSockets('T', time)
+    }).catch(err => {
+        console.log("error file ", err)
     })
+
+    //Terminar la conexion
+    res.end();
 })
 
 function googleSearch(pregunta, respuestasArray, socketID){

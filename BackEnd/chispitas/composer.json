@@ -10,8 +10,12 @@
 		"slack": "https://codeigniterchat.slack.com",
 		"source": "https://github.com/bcit-ci/CodeIgniter"
 	},
+	"config": {
+        "vendor-dir": "application/vendor"
+    },
 	"require": {
-		"php": ">=5.3.7"
+		"php": ">=5.3.7",
+		"thiagoalessio/tesseract_ocr": "^2.7"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

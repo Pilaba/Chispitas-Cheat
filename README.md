@@ -31,8 +31,11 @@ Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero
 ## REQUERIMIENTOS DEL CLIENTE Y SERVIDOR
 *Todos los demás requerimientos serán listados en esta sección posteriormente.*
 ## REQUERIIENTOS
-### Instalación de [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) en Fedora
+* Instalación de [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) en Fedora
 `dnf install tesseract tesseract-langpack-spa`
+* Ejemplo de uso:
+`tesseract -l spa 1559865052486.jpg out txt` => Para sacar OCR en TXT
+`tesseract -l spa 1559865052486.jpg out hocr` => Pasa sacar OCR en HOCR
 
 ## USO DE LA APLICACIÓN
  - npm install 

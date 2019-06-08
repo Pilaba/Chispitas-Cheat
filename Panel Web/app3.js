@@ -45,7 +45,6 @@ app.use(express.urlencoded({limit: '10mb', extended: false }));   //procesar for
 app.post("/", (req, res, next) => {
     //INIT TIME
     let inicio = new Date();
-    let screenshotType = 0     //0 = NORMAL, 1 = VISION, 2 = ONLY RESPONSES
 
     let bufferImage = Buffer.from(req.body.imgasB64, 'base64')
     //Guardar imagen async
@@ -67,23 +66,20 @@ app.post("/", (req, res, next) => {
 
         //Remover el numero de inicio en algunas preguntas de Q12
         if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
-        //Se eliminan articulos, signos etc de la pregunta
-        pregunta = removeWords(pregunta).replace(/\s+/g,' ').normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, "")
+        pregunta = pregunta.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
 
         respuestasArray = respuestas  
-        console.log(pregunta)
-        console.log(respuestas);
+        console.log(pregunta, respuestas)
         
         return pregunta
-    }).then((pregunta)=> {
+    }).then(pregunta => {
         ///// Google Search
         googleSearch(pregunta, respuestasArray)
 
         ///// Bing search
         bingSearch(pregunta, respuestasArray)
 
-        //TIMES UP
+        //TIMES UP -> LETS DO THIS
         let time = ( new Date() - inicio ) / 1000
         console.log("TIME TO PROCESS ", time);
         emitSockets('T', time)

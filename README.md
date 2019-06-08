@@ -19,6 +19,7 @@ Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero
  - [x]  Mejorar busquedas en Google
  - [x] Opción para typear la pregunta
  - [x] Mejorar la vista de opciones googleadas y el desplegado de resultados
+ - [ ] Usar servicio OCR nativo con [Tesseract OCR](https://github.com/tesseract-ocr/tesseract)  y [Tesseract OCR for PHP](https://github.com/thiagoalessio/tesseract-ocr-for-php) 
  - [ ] Crear Backend en CodeIgniter para almacenar datos y mostrar estadísticas
  - [ ] Evaluar implementar Machine Learning
 
@@ -29,9 +30,14 @@ Aplicación para hacer un dinero bien chingón en Confetti y Q12. Todo el dinero
 
 ## REQUERIMIENTOS DEL CLIENTE Y SERVIDOR
 *Todos los demás requerimientos serán listados en esta sección posteriormente.*
+## REQUERIIENTOS
+* Instalación de [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) en Fedora
+`dnf install tesseract tesseract-langpack-spa`
+* Ejemplo de uso:
+`tesseract -l spa 1559865052486.jpg out txt` => Para sacar OCR en TXT
+`tesseract -l spa 1559865052486.jpg out hocr` => Pasa sacar OCR en HOCR
 
 ## USO DE LA APLICACIÓN
-
  - npm install 
  - npm start -> para iniciar
  - npm stop -> para detener

@@ -12,12 +12,12 @@ AWS.config.update({
 
 const vision = require('@google-cloud/vision');             
 const client = new vision.ImageAnnotatorClient({
-    projectId: 'cloudapi-test-230302',
+    projectId: 'chispas',
     keyFilename: './GoogleVisioApiCred.json'
 })
 
 let recognition = new AWS.Rekognition()
-let strBase64   = fs.readFileSync("./imagenes/1559605695886.jpg", {encoding: 'base64'});
+let strBase64   = fs.readFileSync("./imagenes/1559962447084.jpg", {encoding: 'base64'});
 
 async function testFREEOCR() {
     let inicio = new Date()
@@ -170,11 +170,12 @@ async function startTest(number) {
     }
     console.log(TIME);
 
+    /*
     TIME = []
     for (let index = 0; index < number; index++) {
         TIME.push(await testGoogleOCRSHARP())
     }
-    console.log(TIME);
+    console.log(TIME);*/
 }
 
 startTest(5)

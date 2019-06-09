@@ -5,7 +5,7 @@ const http = require('http').createServer(app)
 const io = require("socket.io").listen(http)
 const fs = require("fs")
 const path = require("path")
-const sharp = require("sharp")
+const request = require("request")
 
 //Dengurs - Autorizar sitios https con certificado caduco o auto firmado
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  
@@ -30,15 +30,8 @@ io.on('connection', function (socket) {
 })
 
 //3rd party Libraries setup
-const busboy = require('connect-busboy');
 const GET = require('request-promise');                          // api rest client
 const cheerio = require('cheerio');                              // Basically jQuery for node.js
-const vision = require('@google-cloud/vision');                  // google vision api
-const client = new vision.ImageAnnotatorClient({
-    projectId: 'chispas',
-    keyFilename: './GoogleVisioApiCred.json'
-})
-app.use(require("serve-favicon")(__dirname + '/favicon.ico'))
 app.use(express.json({limit: '10mb'}));    //para parsear json automaticamente
 app.use(express.urlencoded({limit: '10mb', extended: false }));   //procesar forms
 
@@ -49,43 +42,40 @@ app.post("/", (req, res, next) => {
     let bufferImage = Buffer.from(req.body.imgasB64, 'base64')
     //Guardar imagen async
     fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
-
-    let pregunta = sharp(bufferImage).resize(480, 130, {position : "top"}).toBuffer()
-    let respuestas = sharp(bufferImage).resize(480, 255, {position : "bottom"}).toBuffer()
-
-    Promise.all([pregunta, respuestas]).then(bufferImagenes => {
-        let OCRPregunta  = client.textDetection( {image: { content: bufferImagenes[0] }} )
-        let OCRRespuesta = client.textDetection( {image: { content: bufferImagenes[1] }} )
     
-        return Promise.all([OCRPregunta, OCRRespuesta])
-    }).then(data => {
-        let pregunta = data[0][0].fullTextAnnotation.text
-            .replace("\n", " ").replace(/\r?\n|\r/g, " ")    //Replace all white spaces and new lines
-        let respuestas = data[1][0].fullTextAnnotation.text
-            .split("\n").filter(word => word.length > 0);   //replace empty words
-
+    //Azure in action
+    request.post({
+        uri : 'https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/ocr',
+        qs  : { 'language': 'es', },
+        body: bufferImage,
+        headers: {
+            'Content-Type': 'application/octet-stream',
+            'Ocp-Apim-Subscription-Key' : '32a88b112c6040d1bdcff4f949fa5e86'
+        }
+    }, (error, response, body) => {
+        if (error) { console.log('Error OCR '); return; }
+        let lineas = JSON.parse(body).regions[0].lines
+    
+        let respuestas = [
+            lineas.pop().words.map(el => el.text).join(" "), 
+            lineas.pop().words.map(el => el.text).join(" "), 
+            lineas.pop().words.map(el => el.text).join(" ")
+        ].reverse()
+        let pregunta = lineas.map(el => el.words.map(el => el.text).join(" ")).join(" ")
+        
         //Remover el numero de inicio en algunas preguntas de Q12
         if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
         pregunta = pregunta.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-
+    
         respuestasArray = respuestas  
-        console.log(pregunta, respuestas)
-        
-        return pregunta
-    }).then(pregunta => {
-        ///// Google Search
-        googleSearch(pregunta, respuestasArray)
 
-        ///// Bing search
+        googleSearch(pregunta, respuestasArray)
         bingSearch(pregunta, respuestasArray)
 
-        //TIMES UP -> LETS DO THIS
         let time = ( new Date() - inicio ) / 1000
-        console.log("TIME TO PROCESS ", time);
+        console.log(pregunta, respuestas, " T:", time)
         emitSockets('T', time)
-    }).catch(err => {
-        console.log("error file ", err)
-    })
+    });
 
     //Terminar la conexion
     res.end();

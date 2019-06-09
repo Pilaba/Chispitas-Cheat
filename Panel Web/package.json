@@ -4,6 +4,7 @@
   "description": "Chispitas cheat app",
   "main": "index.js",
   "dependencies": {
+    "@google-cloud/vision": "^1.1.0",
     "aws-sdk": "^2.467.0",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.2",
@@ -15,6 +16,7 @@
     "node-tesseract-ocr": "^0.1.0",
     "nodecr": "0.0.5",
     "ocr-space-api": "^1.0.1",
+    "pm2": "^3.5.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "serve-favicon": "^2.5.0",
@@ -22,9 +24,9 @@
     "socketio": "^1.0.0",
     "ssl-root-cas": "^1.3.1",
     "tesseract.js": "^2.0.0-alpha.10",
-    "vue": "^2.6.9",
-    "@google-cloud/vision": "^1.1.0"
+    "vue": "^2.6.9"
   },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "pm2 start azureApp.js --node-args='--max_old_space_size=4096'",

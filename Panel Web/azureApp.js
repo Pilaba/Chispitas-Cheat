@@ -54,27 +54,34 @@ app.post("/", (req, res, next) => {
         }
     }, (error, response, body) => {
         if (error) { console.log('Error OCR '); return; }
-        let lineas = JSON.parse(body).regions[0].lines
-    
-        let respuestas = [
-            lineas.pop().words.map(el => el.text).join(" "), 
-            lineas.pop().words.map(el => el.text).join(" "), 
-            lineas.pop().words.map(el => el.text).join(" ")
-        ].reverse()
-        let pregunta = lineas.map(el => el.words.map(el => el.text).join(" ")).join(" ")
-        
-        //Remover el numero de inicio en algunas preguntas de Q12
-        if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
-        pregunta = pregunta.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
-    
-        respuestasArray = respuestas  
 
-        googleSearch(pregunta, respuestasArray)
-        bingSearch(pregunta, respuestasArray)
+        try {
+            let lineas = JSON.parse(body).regions[0].lines
+            if(lineas.length < 3){
+                console.log("menor");
+                lineas = JSON.parse(body).regions[1].lines
+            }
+            respuestasArray = [
+                lineas.pop().words.map(el => el.text).join(" "), 
+                lineas.pop().words.map(el => el.text).join(" "), 
+                lineas.pop().words.map(el => el.text).join(" ")
+            ].reverse()
 
-        let time = ( new Date() - inicio ) / 1000
-        console.log(pregunta, respuestas, " T:", time)
-        emitSockets('T', time)
+            let pregunta = lineas.map(el => el.words.map(el => el.text).join(" ")).join(" ")
+
+            //Remover el numero de inicio en algunas preguntas de Q12
+            if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
+            pregunta = pregunta.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")
+
+            googleSearch(pregunta, respuestasArray)
+            bingSearch(pregunta, respuestasArray)
+
+            let time = ( new Date() - inicio ) / 1000
+            console.log(pregunta, respuestasArray, " T:", time)
+            emitSockets('T', time)
+        } catch(err) {
+            console.log("ERROR OCR: ", err);
+        }
     });
 
     //Terminar la conexion
@@ -166,8 +173,8 @@ function googleSearch(pregunta, respuestasArray, socketID){
         let googleHeaderRoot = $("div.ifM9O")
         if(googleHeaderRoot.text().trim() != ""){
             let cabeza = $(googleHeaderRoot).find(".kp-header")
+
             $(cabeza).find(".LEsW6e").remove()
-            $(cabeza).find(".kno-fb-ctx").remove()
             $(cabeza).find(".rhsl4").remove()
             $(cabeza).find("svg").remove()
             let cuerpo = $(googleHeaderRoot).find(".SALvLe")
@@ -175,7 +182,7 @@ function googleSearch(pregunta, respuestasArray, socketID){
 
             let container = $(googleHeaderRoot).find(".rl_container") 
 
-            emitSockets("googleHeader", { htmlHeader: cabeza.html() + container.html() + cuerpo.html() })
+            emitSockets("googleHeader", { htmlHeader: cabeza.html() + container.html() + cuerpo.html()  })
 
             //Experimental
             let headerTexto = $(googleHeaderRoot).find(".LGOjhe")

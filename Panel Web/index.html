@@ -30,6 +30,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+    <script src="https://cdn.jsdelivr.net/mark.js/8.6.0/jquery.mark.min.js"></script>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -70,7 +71,23 @@
             chart.draw(data, options);
         }
     </script>
-
+    <style>
+        mark {
+            background-color:whitesmoke;
+        }
+        .underlineGREEN {
+            text-decoration: underline !important; text-decoration-color: green !important;
+            font-size: 25px !important;            color: green!important;
+        }
+        .underlineBLACK {
+            text-decoration: underline!important;  text-decoration-color: black !important;
+            font-size: 25px !important;            color: black !important;
+        }
+        .underlineRED {
+            text-decoration: underline!important;  text-decoration-color: red !important;
+            font-size: 25px !important;            color: red !important;
+        }
+    </style>
 </head>
 <body>  
     <div class="container" id="app">
@@ -206,7 +223,7 @@
                       s.parentNode.insertBefore(gcse, s);
                     })();
                 </script>
-                <gcse:searchresults-only gname="search" webSearchResultSetSize="5"></gcse:searchresults-only>
+                <gcse:searchresults-only gname="search" webSearchResultSetSize="10"></gcse:searchresults-only>
             </div>
         </div>
 
@@ -270,6 +287,47 @@
                     this.itemsBusqueda = data.items
 
                     google.search.cse.element.getElement("search").execute(this.pregunta)
+
+                    //SEARCH WORDS IN DOCUMENT -> JQUERY PLUGIN https://markjs.io
+                    setTimeout(function() {
+                        data.respuestas.forEach((element, index) => {
+                            var regex = new RegExp('\\b'+element+'\\b', "gi");
+                            switch (index) {
+                                case 0:
+                                    $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineGREEN"});  
+                                    break;
+                                case 1:
+                                    $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineBLACK"});  
+                                    break;
+                                default:
+                                    $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineRED"});  
+                            }
+                        });
+
+                    }, 1500)
+                      
+                /* BUSQUEDA A PATA
+                    setTimeout(function() {
+                        $('#searchContent').html(function() { 
+                            let html = $(this).html()
+
+                            data.respuestas.forEach((element, index) => {
+                                console.log(element);
+                                var regex = new RegExp('\\b'+element+'\\b', "gi");
+                                switch (index) {
+                                    case 0:
+                                        html = html.replace(regex, "<b class='underlineGREEN'>"+element+"</b>");  
+                                        break;
+                                    case 1:
+                                        html = html.replace(regex, "<b class='underlineBLACK'>"+element+"</b>");  
+                                        break;
+                                    default:
+                                        html = html.replace(regex, "<b class='underlineRED'>"+element+"</b>");  
+                                }
+                            });
+                            return html
+                        });
+                    }, 1300);*/
                 },
                 onGrafica: function(data){
                     this.linksParseados++ 

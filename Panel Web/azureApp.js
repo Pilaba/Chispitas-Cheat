@@ -68,7 +68,7 @@ app.post("/", (req, res, next) => {
             ].reverse()
 
             let pregunta = lineas.map(el => el.words.map(el => el.text).join(" ")).join(" ")
-
+            pregunta = removeWords(pregunta)
             //Remover el numero de inicio en algunas preguntas de Q12
             if(pregunta.match(/^\d/)){ pregunta = pregunta.substring(4, pregunta.lenght);  }
             pregunta = pregunta.replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g, "")

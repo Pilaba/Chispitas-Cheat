@@ -1,4 +1,4 @@
-//Web setup
+﻿//Web setup
 const express = require('express');
 const app = express();   
 const http = require('http').createServer(app)
@@ -45,12 +45,12 @@ app.post("/", (req, res, next) => {
     
     //Azure in action
     request.post({
-        uri : 'https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/ocr',
+        uri : 'https://southcentralus.api.cognitive.microsoft.com/vision/v2.0/ocr',
         qs  : { 'language': 'es', },
         body: bufferImage,
         headers: {
             'Content-Type': 'application/octet-stream',
-            'Ocp-Apim-Subscription-Key' : '32a88b112c6040d1bdcff4f949fa5e86'
+            'Ocp-Apim-Subscription-Key' : '84fae83715e44c49b7889738fd1b9c05'
         }
     }, (error, response, body) => {
         if (error) { console.log('Error OCR '); return; }

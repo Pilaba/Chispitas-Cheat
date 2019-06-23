@@ -50,7 +50,7 @@ app.post("/", (req, res, next) => {
     //Azure in action
     request.post({
         uri : process.env.AZURE_OCR_URI,
-        qs  : { 'language': 'es', },
+        qs  : { 'language': 'es',  },
         body: bufferImage,
         headers: {
             'Content-Type': 'application/octet-stream',

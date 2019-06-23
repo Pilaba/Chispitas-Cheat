@@ -26,6 +26,9 @@ import android.util.DisplayMetrics
 import android.view.*
 import android.widget.Button
 import android.widget.ImageButton
+import com.koushikdutta.async.http.body.AsyncHttpRequestBody
+import com.koushikdutta.async.http.body.JSONObjectBody
+import org.json.JSONObject
 import kotlin.concurrent.thread
 
 @SuppressLint("NewApi")  //Supress warning api level
@@ -145,9 +148,9 @@ class MyService : Service(), ImageReader.OnImageAvailableListener {
             val stringB64 = Base64.encodeToString(byteArr.toByteArray(), Base64.DEFAULT)
 
             val post = AsyncHttpPost(sp.getString("ip", ""))
-            val body = MultipartFormDataBody()
-            body.addStringPart("imgasB64", stringB64)
-            post.body = body
+            val json = JSONObject(hashMapOf("imgasB64" to stringB64))
+
+            post.body = JSONObjectBody(json)
             AsyncHttpClient.getDefaultInstance().execute(post) {_,_ -> }
 
             //Once we get the image, release stuff

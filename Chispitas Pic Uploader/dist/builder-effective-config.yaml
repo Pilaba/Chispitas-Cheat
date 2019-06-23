@@ -1,0 +1,13 @@
+directories:
+  output: dist
+  buildResources: build
+nsis:
+  oneClick: false
+  perMachine: true
+  shortcutName: Chispitas pic uploader
+appId: confetti.cono.peludo
+mac:
+  category: your.app.category.type
+win:
+  target: nsis
+electronVersion: 5.0.4

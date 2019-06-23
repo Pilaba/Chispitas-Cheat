@@ -5,7 +5,9 @@ const http = require('http').createServer(app)
 const io = require("socket.io").listen(http)
 const fs = require("fs")
 const path = require("path")
-const request = require("request")
+const mysql = require("mysql")
+const request = require("request")                      //Request API
+require('dotenv').config();                             //Cargar variables de entorno .env  
 
 //Dengurs - Autorizar sitios https con certificado caduco o auto firmado
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  
@@ -30,10 +32,12 @@ io.on('connection', function (socket) {
 })
 
 //3rd party Libraries setup
-const GET = require('request-promise');                          // api rest client
-const cheerio = require('cheerio');                              // Basically jQuery for node.js
-app.use(express.json({limit: '10mb'}));    //para parsear json automaticamente
-app.use(express.urlencoded({limit: '10mb', extended: false }));   //procesar forms
+const GET = require('request-promise');                                  // API REST CLIENT
+const cheerio = require('cheerio');                                      // JQUERY FOR NODEJS
+app.use(express.json({limit: '10mb'}));                                  // PARSEAR JSON AUTOMATICAMENTE
+app.use(express.urlencoded({limit: '10mb', extended: false }));          // PROCESAR FORMULARIOS
+app.use(require("serve-favicon")(__dirname + '/public/favicon.ico'))     // ICONO DE LA APP
+app.use(express.static('public'));                                       // DIRECTORIO PUBLICO
 
 app.post("/", (req, res, next) => {
     //INIT TIME
@@ -42,15 +46,15 @@ app.post("/", (req, res, next) => {
     let bufferImage = Buffer.from(req.body.imgasB64, 'base64')
     //Guardar imagen async
     fs.writeFile(path.resolve(`imagenes`, inicio.getTime()+".jpg"), bufferImage, (err) => { })
-    
+
     //Azure in action
     request.post({
-        uri : 'https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/ocr',
+        uri : process.env.AZURE_OCR_URI,
         qs  : { 'language': 'es', },
         body: bufferImage,
         headers: {
             'Content-Type': 'application/octet-stream',
-            'Ocp-Apim-Subscription-Key' : '32a88b112c6040d1bdcff4f949fa5e86'
+            'Ocp-Apim-Subscription-Key' : process.env.AZURE_API_KEY
         }
     }, (error, response, body) => {
         if (error) { console.log('Error OCR '); return; }
@@ -83,7 +87,7 @@ app.post("/", (req, res, next) => {
             console.log("ERROR OCR: ", err);
         }
     });
-
+    
     //Terminar la conexion
     res.end();
 })
@@ -286,6 +290,34 @@ function removeWords(str){
 
     return str
 }
+
+function saveInDB(arrayData) {
+    try{
+        var connection = mysql.createConnection({
+            host     : process.env.DB_HOST,
+            user     : process.env.DB_USER,
+            password : process.env.DB_PASS,
+            database : process.env.DB_DBNAME
+        });
+        console.log(process.env.DB_HOST);
+        
+        connection.connect(err => {
+            if (err) {  throw err;  }
+            connection.query({
+                sql: `INSERT INTO preguntas(preg_completa, preg_tratada, preg_r1, preg_r2, preg_r3, 
+                    preg_gr1, preg_gr2, preg_gr3, preg_tr1, preg_tr2, preg_tr3, preg_correcta, preg_img, preg_orc)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                values: arrayData
+            }, function (error, results, fields) {
+                if (error) throw error;
+                console.log("All OK ", results);
+            });
+        });
+    }catch(error){
+        console.error(error)
+    }
+}
+
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");

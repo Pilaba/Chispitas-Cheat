@@ -3,16 +3,16 @@
 const request = require('request');
 const fs      = require('fs')
 
-const b64 = fs.readFileSync('./test.jpg', {encoding: "base64"})
+const b64 = fs.readFileSync('./imagenes/1561254286172.jpg', {encoding: "base64"})
 let bufferImage = Buffer.from(b64, 'base64')
 
 const options = {
-    uri : 'https://westcentralus.api.cognitive.microsoft.com/vision/v2.0/ocr',
+    uri : 'https://southcentralus.api.cognitive.microsoft.com/vision/v2.0/ocr',
     qs  : { 'language': 'es', },
     body: bufferImage,
     headers: {
         'Content-Type': 'application/octet-stream',
-        'Ocp-Apim-Subscription-Key' : '32a88b112c6040d1bdcff4f949fa5e86'
+        'Ocp-Apim-Subscription-Key' : '84fae83715e44c49b7889738fd1b9c05'
     }
 };
 

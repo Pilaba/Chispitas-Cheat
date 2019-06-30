@@ -289,45 +289,41 @@
                     google.search.cse.element.getElement("search").execute(this.pregunta)
 
                     //SEARCH WORDS IN DOCUMENT -> JQUERY PLUGIN https://markjs.io
-                    setTimeout(function() {
-                        data.respuestas.forEach((element, index) => {
-                            var regex = new RegExp('\\b'+element+'\\b', "gi");
-                            switch (index) {
-                                case 0:
-                                    $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineGREEN"});  
-                                    break;
-                                case 1:
-                                    $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineBLACK"});  
-                                    break;
-                                default:
-                                    $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineRED"});  
-                            }
-                        });
-
-                    }, 1500)
-                      
-                /* BUSQUEDA A PATA
-                    setTimeout(function() {
-                        $('#searchContent').html(function() { 
-                            let html = $(this).html()
-
+                    let interval = setInterval(() => {
+                        if($(".gsc-resultsbox-visible").length && !$(".gsc-control-wrapper-cse").hasClass("gsc-loading-fade")){
+                            // Highlight words
                             data.respuestas.forEach((element, index) => {
-                                console.log(element);
-                                var regex = new RegExp('\\b'+element+'\\b', "gi");
+                            var regex = new RegExp('\\b'+element+'\\b', "gi");
                                 switch (index) {
                                     case 0:
-                                        html = html.replace(regex, "<b class='underlineGREEN'>"+element+"</b>");  
+                                        $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineGREEN"});  
                                         break;
                                     case 1:
-                                        html = html.replace(regex, "<b class='underlineBLACK'>"+element+"</b>");  
+                                        $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineBLACK"});  
                                         break;
                                     default:
-                                        html = html.replace(regex, "<b class='underlineRED'>"+element+"</b>");  
+                                        $("#searchContent").markRegExp(regex, { "element": "", "className": "underlineRED"});  
                                 }
                             });
-                            return html
-                        });
-                    }, 1300);*/
+
+                            // Filter Highlighted words
+                            let links = Array.from($(".gsc-expansionArea")[0].children)
+                            let arrayMarcas = links.filter(el => { return  $(el).find("mark").length > 0 })
+                            while(arrayMarcas.length < 5 && links.length+arrayMarcas.length >= 5){
+                                let elementu = links.shift();
+                                if (arrayMarcas.indexOf(elementu) == -1 ) {
+                                    arrayMarcas.push(elementu) 
+                                }
+                            }
+                            for (let i = 0; i < links.length; i++) {
+                                if( arrayMarcas.indexOf(links[i]) == -1){
+                                    $(links[i]).hide()
+                                }
+                            }
+
+                            clearInterval(interval)
+                        }
+                    }, 100);
                 },
                 onGrafica: function(data){
                     this.linksParseados++ 

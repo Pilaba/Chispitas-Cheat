@@ -87,6 +87,13 @@
             text-decoration: underline!important;  text-decoration-color: red !important;
             font-size: 25px !important;            color: red !important;
         }
+        #futir {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            height: 25px;
+        }
     </style>
 </head>
 <body>  
@@ -124,8 +131,7 @@
               </li>
               <li>
                   <a class="btn fa fa-window-close" 
-                    onClick="
-                        document.getElementById('navBar').style.display = 'none'"> Close navbar
+                    onClick="document.getElementById('navBar').style.display = 'none'"> Close navbar
                   </a>
               </li>
             </ul>
@@ -189,10 +195,11 @@
             </div>
             
             <div class="col-md-6" id="searchContent">
-                <div class="col-md-12" style="background-color: white" 
+                <div class="col-md-12" style="background-color: white;" 
                     v-html="googleTextoHeaderHTML">
                 </div>
 
+                <!--
                 <div class="col-md-12">
                     <a class="chip" v-for="chip in entities" v-bind:href="'https://www.google.com/search?q=' + chip" target="_blank"
                     style="display: inline-block; border-radius: 25px; background-color: white;
@@ -201,6 +208,7 @@
                     </a>
                 </div>
 
+                
                 <div class="col-md-9" style="padding: 20px">
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
                     <input v-model="REquestion" v-on:keyup.enter="submit" type="text" class="col-md-12 form-control">
@@ -210,7 +218,7 @@
                     <button v-on:click="submit" type="button" class="col-md-12 form-control btn-success">
                         <i class="fa fa-search" aria-hidden="true"></i> GO!
                     </button>
-                </div>
+                </div>-->
 
                 <script>
                     (function() {
@@ -226,9 +234,8 @@
                 <gcse:searchresults-only gname="search" webSearchResultSetSize="10"></gcse:searchresults-only>
             </div>
         </div>
-
-    </div> <!-- /container -->
-
+        <v-progress-linear id="futir" :value="countDownTimer" height="25" color="red darken-2"></v-progress-linear>
+    </div> <!-- /container -->s
 </body>
 <footer class="footer">
     <div class="container">
@@ -242,7 +249,7 @@
             el: '#app',
             data: function() {
                 return {
-                    TIME: 1.52, socket :{}, pregunta: "¿Cual de estos manes NO es futbolista?", 
+                    TIME: 1.337, socket :{}, pregunta: "¿Cual de estos manes NO es futbolista?", 
                     respuestas: ['Messi', 'Hulk', 'Fernando Alonso'],  REquestion: '',
                     itemsBusqueda: [
                         {link: "https://taringa.net", htmlTitle: "Messi el hormonado", p: {A:90, B:5, C:5}}
@@ -253,7 +260,8 @@
                     googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>',
                     googleTextoHeaderHTML : '<p>...</p>',
                     linksParseados: 0,
-                    entities: [], entityLabel: "coño peludo"
+                    entities: [], entityLabel: "coño peludo",
+                    countDownTimer: 100
                 }
             },
             created: function () {
@@ -270,6 +278,15 @@
             methods: {
                 onTime: function(timeMillis){
                     this.TIME = timeMillis
+
+                    this.countDownTimer = 100 - (this.TIME * 10 + 10)
+                    let interval = setInterval(()=> {
+                        if(!(this.countDownTimer <= 0)){
+                            this.countDownTimer = this.countDownTimer - 1
+                        }else {
+                            clearInterval(interval)
+                        }
+                    }, 100)
                 },
                 onQuestion: function(data){
                     //reset data
@@ -357,9 +374,6 @@
                 onVisionImage: function (data) {
                     this.entities = data.entities
                     this.entityLabel = data.label
-                },
-                searchCoincidences: function () {
-                    //console.log($("#searchContent").text());
                 }
             },
             computed: {

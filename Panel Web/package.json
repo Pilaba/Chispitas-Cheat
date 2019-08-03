@@ -6,6 +6,7 @@
   "dependencies": {
     "@google-cloud/vision": "^1.1.0",
     "aws-sdk": "^2.467.0",
+    "axios": "^0.19.0",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.2",
     "connect-busboy": "^0.0.2",
@@ -34,7 +35,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "pm2 start azureApp.js --node-args='--max_old_space_size=4096'",
+    "start": "pm2 start app.js --node-args='--max_old_space_size=4096'",
     "stop": "pm2 stop all",
     "restart": "pm2 restart all"
   },

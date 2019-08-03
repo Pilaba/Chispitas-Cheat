@@ -140,7 +140,7 @@
       </nav>
 
         <!-- FORMULARIO DE PRUEBAS -->
-        <div class="row collapse" id="pruebaForm">
+        <!--<div class="row collapse" id="pruebaForm">
             <div class="col-md-12">
                 <v-container>
                     <v-layout row wrap>
@@ -150,11 +150,11 @@
                         <v-text-field color="indigo" label="Opcion 1" v-model="respuestas[0]"></v-text-field> 
                         <v-text-field color="indigo" label="Opcion 2" v-model="respuestas[1]"></v-text-field> 
                         <v-text-field color="indigo" label="Opcion 3" v-model="respuestas[2]"></v-text-field> 
-                        <v-btn outline block v-on:click="submitPrueba" color="indigo"> GO ! </v-btn>
+                        <v-btn outlined block v-on:click="submitPrueba" color="indigo"> GO ! </v-btn>
                     </v-layout>
                 </v-container>
             </div>
-        </div>
+        </div>-->
         
         <div class="row">
             <div class="col-md-6">         
@@ -199,7 +199,7 @@
                     v-html="googleTextoHeaderHTML">
                 </div>
 
-                <!--
+                
                 <div class="col-md-12">
                     <a class="chip" v-for="chip in entities" v-bind:href="'https://www.google.com/search?q=' + chip" target="_blank"
                     style="display: inline-block; border-radius: 25px; background-color: white;
@@ -207,8 +207,8 @@
                         {{ chip }}
                     </a>
                 </div>
-
                 
+                <!--
                 <div class="col-md-9" style="padding: 20px">
                     <label><i class="fa fa-search-plus" aria-hidden="true"></i>&nbsp;Búsqueda personalizada </label>
                     <input v-model="REquestion" v-on:keyup.enter="submit" type="text" class="col-md-12 form-control">
@@ -218,8 +218,8 @@
                     <button v-on:click="submit" type="button" class="col-md-12 form-control btn-success">
                         <i class="fa fa-search" aria-hidden="true"></i> GO!
                     </button>
-                </div>-->
-
+                </div>
+                -->
                 <script>
                     (function() {
                       var cx = '001129582380055340761:tkxrmpvv4re';
@@ -234,8 +234,7 @@
                 <gcse:searchresults-only gname="search" webSearchResultSetSize="10"></gcse:searchresults-only>
             </div>
         </div>
-        <v-progress-linear id="futir" :value="countDownTimer" height="25" color="red darken-2"></v-progress-linear>
-    </div> <!-- /container -->s
+    </div> <!-- /container -->
 </body>
 <footer class="footer">
     <div class="container">
@@ -278,15 +277,6 @@
             methods: {
                 onTime: function(timeMillis){
                     this.TIME = timeMillis
-
-                    this.countDownTimer = 100 - (this.TIME * 10 + 10)
-                    let interval = setInterval(()=> {
-                        if(!(this.countDownTimer <= 0)){
-                            this.countDownTimer = this.countDownTimer - 1
-                        }else {
-                            clearInterval(interval)
-                        }
-                    }, 100)
                 },
                 onQuestion: function(data){
                     //reset data
@@ -380,29 +370,17 @@
                 resaltarTablaIndex: function(){
                     let data = []
                     this.eachWord.forEach((item, index) =>  {
-                        //get the min element
+                        //Array con el numero de incidencias para cada respuesta
                         let arrr = []
                         item.forEach(el => { arrr.push(parseInt(el.count)) });
-
-                        var minimoIndice = arrr.indexOf(Math.min(...arrr))
-                        if(arrr[minimoIndice] == 0){    //Hay un 0 en los elementos -> sumarlos
-                            let suma = 0
-                            arrr.forEach(el => suma += parseInt(el.count))
-
-                            data[index] = (suma / arrr.length)
-                        }else {                         //Hay alemos un elemento mayor a 0 -> multiplicarlos y sumarlos
-                            let suma = Math.pow(arrr[minimoIndice], arrr.length) 
-                            
-                            arrr.forEach((element, i) => {
-                                if(i != minimoIndice) {
-                                    suma += (element - arrr[minimoIndice])
-                                }
-                            });
-
-                            data[index] =  (suma / arrr.length)
-                        }
+                        
+                        //Suma de las incidencias en las palabras 
+                        let count = arrr.reduce(function (anterior, actual) {
+                            return anterior + actual
+                        })
+                        //Division entre la cantidad de palabras
+                        data.push(count / arrr.length)
                     })
-                    data = data.map(el => isNaN(el) ? 0 : el)
                     return data.indexOf(Math.max(...data))
                 }
             }

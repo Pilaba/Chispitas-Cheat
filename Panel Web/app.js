@@ -334,6 +334,6 @@ app.get("/", (req, res) => {
 })
 
 var port = process.env.PORT || 80
-http.listen(port, function() {
+http.listen(port, "0.0.0.0", function() {
     console.log("To view your app, open this link in your browser: http://localhost:" + port);
 })

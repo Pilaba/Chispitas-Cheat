@@ -92,7 +92,13 @@ class MyService : Service(), ImageReader.OnImageAvailableListener {
         val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT
         params.width = ViewGroup.LayoutParams.MATCH_PARENT
-        params.type = WindowManager.LayoutParams.TYPE_PHONE //or WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY > ANDROID OREO
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            params.type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+
         params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_SECURE
         params.format = PixelFormat.TRANSLUCENT
         params.gravity = Gravity.TOP
@@ -100,6 +106,8 @@ class MyService : Service(), ImageReader.OnImageAvailableListener {
         val inflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val view = inflater.inflate(R.layout.overlay_widget, null)
         windowManager.addView(view, params)
+
+
 
         //Listeners widget Buttons
         view.findViewById<Button>(R.id.GO).setOnClickListener {

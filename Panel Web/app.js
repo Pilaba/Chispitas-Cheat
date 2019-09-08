@@ -1,4 +1,4 @@
-//Core setup
+﻿//Core setup
 const express = require('express');
 const app     = express();   
 const http    = require('http').createServer(app)
@@ -12,20 +12,23 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';  // Autorizar sitios https co
 
 //SocketIO setup
 let respuestasArray = []
-let activeRequest = []
+let activeRequest   = []
+let countUsers      =  0
 io.on('connection', function (socket) {
-    socket.on("REquestion", (data) => {
+    emitSockets('connectionsCount', ++countUsers)
+
+    socket.on('REquestion', (data) => {
         activeRequest.forEach(req => {
             req.abort();
         });
         googleSearch(data.q, respuestasArray, data.id, true)
         bingSearch(data.q, respuestasArray, data.id, true)
-    })
-
-    socket.on("Pruebas", (data) => {
+    }).on('Pruebas', (data) => {
         respuestasArray = data.respuestas
         googleSearch(data.q, respuestasArray, data.id)
         bingSearch(data.q, respuestasArray, data.id)
+    }).on('disconnect', (data) => {
+        emitSockets('connectionsCount', --countUsers)
     })
 })
 
@@ -95,14 +98,14 @@ app.post("/", async (req, res, next) => {
 function googleSearch(pregunta, respuestasArray, socketID){
     //Resetear cotador de incidencias para cada palabra
     let BuscaPalabra = [[{}], [{}], [{}]]
-    activeRequest = []
+    activeRequest    = []
 
     GET({
         uri: "https://www.google.com.mx/search",
         headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
         qs: {
             q : pregunta,
-            count : 15
+            count : 13
         }, transform: function (body) { return cheerio.load(body); } 
     }).then($ => {
         let resultados = $("div.g")
@@ -164,8 +167,18 @@ function googleSearch(pregunta, respuestasArray, socketID){
                             }
                         });
                     });
+
+                    //Para panel web
                     emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)
 
+                    //Para app movil
+                    let suma = [0, 0, 0]
+                    BuscaPalabra.forEach((el, index) => {
+                        suma[index] = el.reduce((anterior, actual) => {
+                            return Math.ceil((anterior.count + actual.count) / el.length)
+                        }) 
+                    });
+                    emitSockets("EachWordSearchMovil", {array: suma}, socketID)
                 }).catch(err => {
                     console.log("error parsing google link ", link, " ", "at index", " ", i)
                 })
@@ -176,19 +189,6 @@ function googleSearch(pregunta, respuestasArray, socketID){
         //Google header 
         let googleHeaderRoot = $("div.ifM9O")
         if(googleHeaderRoot.text().trim() != ""){
-            let cabeza = $(googleHeaderRoot).find(".kp-header")
-
-            $(cabeza).find(".LEsW6e").remove()
-            $(cabeza).find(".rhsl4").remove()
-            $(cabeza).find("svg").remove()
-            let cuerpo = $(googleHeaderRoot).find(".SALvLe")
-            $(cuerpo).find(".LEsW6e").remove()
-
-            let container = $(googleHeaderRoot).find(".rl_container") 
-
-            emitSockets("googleHeader", { htmlHeader: cabeza.html() + container.html() + cuerpo.html()  })
-
-            //Experimental
             let headerTexto = $(googleHeaderRoot).find(".LGOjhe")
             emitSockets("textoHeader", { htmlTextoHeader: headerTexto.html() })
         }
@@ -201,7 +201,7 @@ function bingSearch(pregunta, respuestasArray, socketID){
         headers : { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36' }, 
         qs: {
             q : pregunta,
-            count : 12
+            count : 10
         }, transform: function (body) { return cheerio.load(body); } 
     }).then($ => {
         let resultados2 = $("#b_results > li.b_algo")
@@ -334,6 +334,6 @@ app.get("/", (req, res) => {
 })
 
 var port = process.env.PORT || 80
-http.listen(port, "0.0.0.0", function() {
+http.listen(port, function() {
     console.log("To view your app, open this link in your browser: http://localhost:" + port);
 })

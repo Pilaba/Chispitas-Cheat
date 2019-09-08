@@ -94,10 +94,11 @@
             right: 0px;
             height: 25px;
         }
+        [v-cloak] { display: none; }
     </style>
 </head>
 <body>  
-    <div class="container" id="app">
+    <div class="container" id="app" v-cloak>
       <!-- Static navbar -->
       <nav class="navbar navbar-default" id="navBar">
         <div class="container-fluid">
@@ -129,6 +130,7 @@
               <li><a ><i class="fa fa-line-chart text-success" aria-hidden="true">
                   </i>&nbsp;{{ linksParseados }}</a>
               </li>
+              <li><a ><i class="fa fa fa-circle text-success" aria-hidden="true"></i>&nbsp;{{ connectedUsers }} </a></li>
               <li>
                   <a class="btn fa fa-window-close" 
                     onClick="document.getElementById('navBar').style.display = 'none'"> Close navbar
@@ -191,7 +193,6 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="col-md-12" v-html="googleHeaderHTML"> </div>
             </div>
             
             <div class="col-md-6" id="searchContent">
@@ -256,11 +257,11 @@
                     eachWord: [ [{word: "Messi", count : "20"}], [{word: "Hulk", count : "8"}], 
                                 [{word: "Fernando", count : "2"}, {word: "alonso", count : "1"}] ],
                     graficaData: [20, 8, 3],
-                    googleHeaderHTML : '<p>Rey del afano, pibe chorro, pirata del asfalto</p>',
                     googleTextoHeaderHTML : '<p>...</p>',
                     linksParseados: 0,
                     entities: [], entityLabel: "coño peludo",
-                    countDownTimer: 100
+                    countDownTimer: 100,
+                    connectedUsers: 1
                 }
             },
             created: function () {
@@ -269,10 +270,10 @@
                 this.socket.on('Q', this.onQuestion)
                 this.socket.on('Grafica', this.onGrafica)
                 this.socket.on('EachWordSeach', this.onEachWordSeach)
-                this.socket.on('googleHeader', this.onGoogleHeader)
                 this.socket.on('textoHeader', this.onTextoHeader)
                 this.socket.on('respuestasOnly', this.onRespuestasOnly)
                 this.socket.on('visionImage', this.onVisionImage)
+                this.socket.on('connectionsCount', this.connectionsCount)
             },
             methods: {
                 onTime: function(timeMillis){
@@ -339,9 +340,6 @@
                     })
                     drawGrafica()
                 },
-                onGoogleHeader: function(data) {
-                    this.googleHeaderHTML = data.htmlHeader
-                },
                 onTextoHeader: function(data) {
                     this.googleTextoHeaderHTML = data.htmlTextoHeader
                 },
@@ -364,6 +362,9 @@
                 onVisionImage: function (data) {
                     this.entities = data.entities
                     this.entityLabel = data.label
+                },
+                connectionsCount: function (data) {
+                    this.connectedUsers = data
                 }
             },
             computed: {

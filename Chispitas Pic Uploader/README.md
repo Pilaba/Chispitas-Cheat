@@ -1,1 +1,0 @@
-# Chispitas Desktop Pic Uploader

@@ -149,9 +149,10 @@ function googleSearch(pregunta, respuestasArray, socketID){
 
                     //SEARCH FOR EVERY WORD 
                     let arrayClon = [...respuestasArray]  //Clon para prevenir que se modifiquen los valores dentro del array
+                    let suma      = [0, 0, 0]
                     arrayClon.forEach((resp, index, arr) => {
                         let split = removeWords(resp).split(" ").filter(el => el.length > 0)
-                        
+                        let count = 0
                         split.forEach((word, i) => {
                             let encontrados = 
                                 (body.match(new RegExp('\\b'+word.normalize('NFD').replace(/[\u0300-\u036f]/g, "")+'\\b', "gi")) || []).length +
@@ -165,20 +166,17 @@ function googleSearch(pregunta, respuestasArray, socketID){
                                 word: word,
                                 count: sum + encontrados
                             }
+                            count += sum + encontrados
                         });
+
+                        suma[index] = count
                     });
 
                     //Para panel web
                     emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)
-
-                    //Para app movil
-                    let suma = [0, 0, 0]
-                    BuscaPalabra.forEach((el, index) => {
-                        suma[index] = el.reduce((anterior, actual) => {
-                            return Math.ceil((anterior.count + actual.count) / el.length)
-                        }) 
-                    });
+                     //Para app movil
                     emitSockets("EachWordSearchMovil", {array: suma}, socketID)
+
                 }).catch(err => {
                     console.log("error parsing google link ", link, " ", "at index", " ", i)
                 })
@@ -237,29 +235,8 @@ function bingSearch(pregunta, respuestasArray, socketID){
                         array: [encontradosA2, encontradosB2, encontradosC2]
                     }, socketID)
                 }
-                //SEARCH FOR EVERY WORD 
-                /* 
-                let arrayClon2 = [...respuestasArray]  //Clon para prevenir que se modifiquen los valores dentro del array
-                arrayClon2.forEach((resp, index, arr) => {
-                    let split = removeWords(resp).split(" ").filter(el => el.length > 0)
-                    
-                    split.forEach((word, i) => {
-                        let encontrados = 
-                            (body2.match(new RegExp('\\b'+word.normalize('NFD').replace(/[\u0300-\u036f]/g, "")+'\\b', "gi")) || []).length +
-                            (title2.match(new RegExp('\\b'+word.normalize('NFD').replace(/[\u0300-\u036f]/g, "")+'\\b', "gi")) || []).length
-                        
-                        let sum = 0
-                        if(BuscaPalabra[index][i] && BuscaPalabra[index][i].count){
-                            sum = BuscaPalabra[index][i].count
-                        }
-                        BuscaPalabra[index][i] = {
-                            word: word,
-                            count: sum + encontrados
-                        }
-                    });
-                });
-                emitSockets("EachWordSeach", {matriz: BuscaPalabra}, socketID)*/
-                
+                // SEARCH FOR EVERY WORD 
+                // NOT IN BING LUL
             }).catch(err => {
                 console.log("error parsing bing link ", link2, " ", "at index", " ", j)
             })
